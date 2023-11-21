@@ -1,0 +1,1 @@
+uasm64 -Zi3 -elf -IIrvine .\main.asm

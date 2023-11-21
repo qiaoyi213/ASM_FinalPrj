@@ -1,0 +1,1 @@
+ld -A i386:x86_64 -m i386pe -s -o main.exe .\main.obj -LIrvine -lIrvine32 -lKernel32 -lUser32

@@ -1,0 +1,1 @@
+del .\main.exe && .\tools\assemble.bat && .\tools\link.bat && cls && .\main.exe
