@@ -4,7 +4,11 @@ INCLUDE Irvine32.inc
 str1 BYTE "Hello World!",0
 
 .code
+extern Window: PROC
+
 main PROC
+	call Window
+	
 	mov edx, OFFSET str1
 	call WriteString
 	call Crlf
