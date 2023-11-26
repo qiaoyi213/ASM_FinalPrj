@@ -4,15 +4,18 @@ INCLUDE Irvine32.inc
 str1 BYTE "Hello World!",0
 
 .code
-extern Window: PROC
+extern ShowStartMenu: PROC
 
 main PROC
-	call Window
+	call ShowStartMenu
+	; call WaitMsg
+	; call Window
 	
-	mov edx, OFFSET str1
-	call WriteString
-	call Crlf
-	call WaitMsg
+	; mov edx, OFFSET str1
+	; call WriteString
+	; call Crlf
+	; call WaitMsg
+	ret
 main ENDP
 
 
