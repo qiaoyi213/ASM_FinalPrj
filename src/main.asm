@@ -1,20 +1,27 @@
 INCLUDE Irvine32.inc
 
 .data
-str1 BYTE "Hello World!",0
+StartGameMsg BYTE "Game Start!", 0
+GoodByeMsg	 BYTE "Thanks for playing", 0
+SettingMsg	 BYTE "Open Setting Dialogue",0
 
 .code
-extern ShowStartMenu: PROC
+extern HandleStartMenu: PROC
 
 main PROC
-	call ShowStartMenu
-	; call WaitMsg
-	; call Window
-	
-	; mov edx, OFFSET str1
-	; call WriteString
-	; call Crlf
-	; call WaitMsg
+	call HandleStartMenu
+
+	.IF eax == 2
+		mov edx, OFFSET GoodByeMsg
+		call WriteString
+		exit
+	.ELSEIF eax == 0
+		mov edx, OFFSET StartGameMsg
+		call WriteString
+	.ELSEIF eax == 1
+		mov edx, OFFSET SettingMsg
+		call WriteString
+	.ENDIF
 	ret
 main ENDP
 
