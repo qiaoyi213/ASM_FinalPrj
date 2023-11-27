@@ -13,3 +13,5 @@ if(!$r2) {
 	exit
 }
 Write-Output "BUILD SUCCESS!"
+
+.\build\main.exe
