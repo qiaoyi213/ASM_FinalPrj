@@ -21,7 +21,7 @@ $LIBRARY_DIRS_ARRAY | ForEach-Object {
 	$LIBRARY_FALGS += @("-L`"$_`"")
 }
 $LIBRARY_NAME_ARRAY | ForEach-Object {
-	$LIBRARY_FALGS += @("-l`"$_`"")
+	$LIBRARY_FALGS += @("-l$_")
 }
 
 & "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" $OBJ_PATHS $LIBRARY_FALGS
