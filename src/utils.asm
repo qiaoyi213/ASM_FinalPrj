@@ -39,7 +39,6 @@ padding_loop:
 	ret
 WriteStringCenter ENDP
 
-<<<<<<< HEAD
 SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
 	LOCAL StringLen: DWORD
 
