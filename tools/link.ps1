@@ -18,7 +18,7 @@ Get-ChildItem ".\obj" -Filter *.obj | ForEach-Object {
 
 $LIBRARY_FALGS = @()
 $LIBRARY_DIRS_ARRAY | ForEach-Object {
-	$LIBRARY_FALGS += @("-L`"$_`"")
+	$LIBRARY_FALGS += @("-L$_")
 }
 $LIBRARY_NAME_ARRAY | ForEach-Object {
 	$LIBRARY_FALGS += @("-l$_")
