@@ -1,37 +1,15 @@
 INCLUDE Irvine32.inc
 
 .data
-	WelcomeMsg BYTE "Welcome to the game", 0
+	TitleMsg BYTE "Welcome to the game", 0
 
-
+	OptionMsgStart	BYTE "Start"
+	OptionMsgConfig	BYTE "Config"
+	OptionMsgExit	BYTE "Exit"
+	
+	OptionMsg		DWORD OptionMsg, OptionMsgConfig, OptionMsgExit
 .code
-__WriteTitle PROC, cwidth: DWORD, cheight: DWORD
-	LOCAL WelcomeMsgLen: 	 	DWORD
-	LOCAL WelcomeMsgPadding:	DWORD
-
-	mov  edx, OFFSET WelcomeMsg
-	call StrLength
-	mov  WelcomeMsgLen, eax
-
-	mov  edx, cwidth
-	mov  WelcomeMsgPadding, edx
-	mov  edx, WelcomeMsgLen
-	sub  WelcomeMsgPadding, edx
-	mov  edx, WelcomeMsgPadding
-	shr  edx, 1
-	mov  WelcomeMsgPadding, edx  
-
-	mov  ecx, WelcomeMsgPadding
-	mov  al, ' '
-padding_loop:
-	call WriteChar
-	loop padding_loop
-
-	mov  edx, OFFSET WelcomeMsg
-	call WriteString
-	call Crlf
-	ret
-__WriteTitle ENDP
+	extern WriteStringCenter: PROTO, :PTR BYTE, :DWORD, :DWORD
 
 ShowStartMenu PROC
 	LOCAL cwidth:	DWORD
@@ -43,7 +21,17 @@ ShowStartMenu PROC
 	movzx eax, dh
 	mov  cheight, eax
 	
-	invoke __WriteTitle, cwidth, cheight
+	; Write Title
+	invoke WriteStringCenter, OFFSET TitleMsg, cwidth, cheight
+
+	call Crlf
+	call Crlf
+
+	; Write Options
+	; invoke OptionSelectorHandler,
+	; invoke WriteStringCenter, OFFSET Op, cwidth, cheight
+	; call Crlf
+	
 	ret
 ShowStartMenu ENDP
 END
