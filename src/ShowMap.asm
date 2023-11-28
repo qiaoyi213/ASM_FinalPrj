@@ -6,46 +6,19 @@ BUFSIZE = 5000
 buffer BYTE BUFSIZE DUP(?)
 fileHandle DWORD ?
 bytesRead DWORD ?
-fileName BYTE "data", 0
+fileName BYTE "daa", 0
 Result BYTE BUFSIZE DUP(?)
-
+Scene DWORD 30 DUP(?) ; 
 .code
-COORD STRUCT
-	X WORD ?
-	Y WORD ?
-COORD ENDS
 
+extern ReadMapFromFile: PROTO :PTR DWORD
 
-extern SubString: PROTO , StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
-
-ShowMap PROC USES eax ebx ecx edx, StartPos: COORD, cWidth: DWORD, cHeight:DWORD
-	
+ShowMap PROC USES eax ebx ecx edx
  
-	長 = 總數/總共有多少 Row
-	mov ecx, StartPos.Y 
+	invoke ReadMapFromFile, ADDR Scene
 	
-L1:
-	output substring from esi to esi+StartPos.X
-	add esi, 長
-
-	loop L1
 	
-
-
-	mov edx, OFFSET fileName
-	call OpenInputFile
-	mov fileHandle, eax
-
-	mov eax, fileHandle
-	mov edx, OFFSET buffer
-	mov ecx, BUFSIZE
-	call ReadFromFile
-	jc show_error_message
-	mov bytesRead, eax
-
-    invoke SubString, OFFSET buffer,0, 5, OFFSET Result
-
-    mov edx, OFFSET Result
+	mov edx, Scene[0]
 	call WriteString
 
 	ret
