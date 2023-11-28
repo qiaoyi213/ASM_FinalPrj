@@ -10,18 +10,26 @@ fileName BYTE "data", 0
 Result BYTE BUFSIZE DUP(?)
 
 .code
+COORD STRUCT
+	X WORD ?
+	Y WORD ?
+COORD ENDS
+
 
 extern SubString: PROTO , StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
 
-ShowMap PROC USES eax ebx ecx edx 
-    LOCAL cwidth: DWORD
-	LOCAL cheight: DWORD
-    
-    call GetMaxXY
-    movzx eax, dl
-	mov  cwidth, eax
-	movzx eax, dh
-	mov  cheight, eax
+ShowMap PROC USES eax ebx ecx edx, StartPos: COORD, cWidth: DWORD, cHeight:DWORD
+	
+ 
+	長 = 總數/總共有多少 Row
+	mov ecx, StartPos.Y 
+	
+L1:
+	output substring from esi to esi+StartPos.X
+	add esi, 長
+
+	loop L1
+	
 
 
 	mov edx, OFFSET fileName
