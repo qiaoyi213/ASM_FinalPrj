@@ -8,23 +8,15 @@ fileHandle DWORD ?
 bytesRead DWORD ?
 fileName BYTE "daa", 0
 Result BYTE BUFSIZE DUP(?)
-Scene DWORD 30 DUP(?) ; 
+Scene DWORD 30 DUP(?) 
 .code
 
-extern ReadMapFromFile: PROTO :PTR DWORD
+extern ReadMapFromFile: PROTO 
 
 ShowMap PROC USES eax ebx ecx edx
  
-	invoke ReadMapFromFile, ADDR Scene
-	
-	
-	mov edx, Scene[0]
-	call WriteString
+	invoke ReadMapFromFile
 
-	ret
-
-show_error_message:
-	call WriteWindowsMsg
 	ret
 
 ShowMap ENDP
