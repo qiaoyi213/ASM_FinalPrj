@@ -11,9 +11,11 @@ $LIBRARY_NAME_ARRAY = @(
 
 # WORKING ZONE #
 
-$OBJ_PATHS = @()
+$OBJ_PATHS = @(".\obj\main.obj")	# to keep main at first
 Get-ChildItem ".\obj" -Filter *.obj | ForEach-Object {
-	$OBJ_PATHS += @(".\obj\" + $_.Name)
+	IF($_.Name -ne "main.obj") {
+		$OBJ_PATHS += @(".\obj\" + $_.Name)
+	}
 }
 
 $LIBRARY_FALGS = @()
@@ -23,6 +25,7 @@ $LIBRARY_DIRS_ARRAY | ForEach-Object {
 $LIBRARY_NAME_ARRAY | ForEach-Object {
 	$LIBRARY_FALGS += @("-l$_")
 }
+Write-Output $OBJ_PATHS
 
 & "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" $OBJ_PATHS $LIBRARY_FALGS
 return $?

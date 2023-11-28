@@ -24,18 +24,18 @@ main PROC
 	
 	; call HandleStartMenu
 
-	.IF eax == 2
-		mov edx, OFFSET GoodByeMsg
-		call WriteString
-		invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
-		exit
-	.ELSEIF eax == 0
-		mov edx, OFFSET StartGameMsg
-		call ShowMap
-	.ELSEIF eax == 1
-		mov edx, OFFSET SettingMsg
-		call WriteString
-	.ENDIF
+	; .IF eax == 2
+	; 	mov edx, OFFSET GoodByeMsg
+	; 	call WriteString
+	; 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
+	; 	exit
+	; .ELSEIF eax == 0
+	; 	mov edx, OFFSET StartGameMsg
+	; 	call ShowMap
+	; .ELSEIF eax == 1
+	; 	mov edx, OFFSET SettingMsg
+	; 	call WriteString
+	; .ENDIF
 	ret
 
 main ENDP
