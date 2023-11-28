@@ -3,8 +3,8 @@ INCLUDE macros.inc
 .data
 fileName BYTE "data", 0
 buffer BYTE 5000 DUP(?)
-Scene DWORD 30 DUP(?), 0
-tmpStr BYTE 500 DUP(?)
+Scene LABEL DWORD; Array of pointer to BYTE 
+HeapHandle        HANDLE ?
 .code
 
 SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
@@ -51,35 +51,42 @@ SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, L
 	
 	mov esi, StringPtr
 	mov edi, Result
-	
-	mov ecx, 120
+	add esi, StartPos
+
+	mov ecx, Len
 	cld
 	rep movsb
 
 	ret
+
 SubString ENDP
 
 ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE
-	LOCAL StringLen: DWORD
+	
+	LOCAL StartPos: DWORD
 
-	mov ecx, 5
-	mov esi, 0
-	mov edi, Scene
+	mov ecx, 30
+	mov StartPos, 0
+	mov edi, 0
 	
 copy_substring:	
-	
-	invoke SubString, bufferPtr, 0, 120, OFFSET tmpStr
-	
-	mov [Scene], OFFSET tmpStr
-	mov edx, [Scene]
+
+    ; 在堆上分配的地址传递给 SubString
+    invoke SubString, bufferPtr, StartPos, 120, eax	
+
+	mov edx, eax
 	call WriteString
 
-	add esi, 5
-	add edi, 4
+	mov  [Scene + edi], eax ;TODO 
+
+	add StartPos, 120
+	add edi, 4 
+
+	invoke HeapFree, HeapHandle, 0, eax
 	loop copy_substring	
 
+	ret
 ProcessBuffer ENDP
-
 
 
 ReadMapFromFile PROC USES eax ecx edx

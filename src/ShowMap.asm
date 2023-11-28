@@ -4,10 +4,6 @@ INCLUDE Irvine32.inc
 
 BUFSIZE = 5000
 buffer BYTE BUFSIZE DUP(?)
-fileHandle DWORD ?
-bytesRead DWORD ?
-fileName BYTE "daa", 0
-Result BYTE BUFSIZE DUP(?)
 Scene DWORD 30 DUP(?) 
 .code
 
