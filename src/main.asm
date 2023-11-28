@@ -12,7 +12,7 @@ NormalCursorInfo CONSOLE_CURSOR_INFO <?, ?>
 
 .code
 extern HandleStartMenu: PROC
-extern ShowMap: PROC
+extern Boot: PROC
 
 main PROC
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
@@ -20,22 +20,29 @@ main PROC
 	invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
 
+	call Boot
+	cmp eax, 0
+	jne game_start
+	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
+	exit
+game_start:
+
 	; call ShowMap
 	
-	; call HandleStartMenu
+	call HandleStartMenu
 
-	; .IF eax == 2
-	; 	mov edx, OFFSET GoodByeMsg
-	; 	call WriteString
-	; 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
-	; 	exit
-	; .ELSEIF eax == 0
-	; 	mov edx, OFFSET StartGameMsg
-	; 	call ShowMap
-	; .ELSEIF eax == 1
-	; 	mov edx, OFFSET SettingMsg
-	; 	call WriteString
-	; .ENDIF
+	.IF eax == 2
+		mov edx, OFFSET GoodByeMsg
+		call WriteString
+		invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
+		exit
+	.ELSEIF eax == 0
+		mov edx, OFFSET StartGameMsg
+		; call ShowMap
+	.ELSEIF eax == 1
+		mov edx, OFFSET SettingMsg
+		call WriteString
+	.ENDIF
 	ret
 
 main ENDP
