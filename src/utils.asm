@@ -3,7 +3,7 @@ INCLUDE macros.inc
 .data
 fileName BYTE "data", 0
 buffer BYTE 5000 DUP(?)
-Scene LABEL DWORD; Array of pointer to BYTE 
+Scene LABEL DWORD ; Array of pointer to BYTE 
 HeapHandle        HANDLE ?
 .code
 
@@ -61,9 +61,10 @@ SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, L
 
 SubString ENDP
 
-ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE
-	
+ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE ; 將 bufferPtr 的值切分成 30 行 每行 120 字，存在 Scene 中 (TODO)
 	LOCAL StartPos: DWORD
+
+	
 
 	mov ecx, 30
 	mov StartPos, 0
