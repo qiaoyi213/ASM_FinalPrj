@@ -1,14 +1,18 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
+
+INCLUDE Reference.inc
+
 .data
 fileName BYTE "data", 0
 buffer BYTE 5000 DUP(?)
+
 .code
 
 SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
 ProcessBuffer PROTO, :PTR DWORD, :PTR BYTE
 
-WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, cwidth: DWORD, cheight: DWORD, leftDecoPtr: PTR BYTE
+WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, leftDecoPtr: PTR BYTE
 	LOCAL StringLen: 	 	DWORD
 	LOCAL StringPadding:	DWORD
 
@@ -16,7 +20,7 @@ WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, cwidth: DWORD, che
 	call StrLength
 	mov  StringLen, eax
 
-	mov  edx, cwidth
+	mov  edx, GAME_WIDTH
 	mov  StringPadding, edx
 	mov  edx, StringLen
 	sub  StringPadding, edx

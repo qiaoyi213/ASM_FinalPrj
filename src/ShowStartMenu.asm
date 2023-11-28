@@ -12,23 +12,11 @@ INCLUDE Macros.inc
 	OptionMsgs		DWORD OFFSET OptionMsgStart, OFFSET OptionMsgConfig, OFFSET OptionMsgExit
 	NowSelected	DWORD 0
 .code
-	extern WriteStringCenter: PROTO, :PTR BYTE, :DWORD, :DWORD, :PTR BYTE
-
-	ShowStartMenu PROTO, :DWORD, :DWORD
+	extern WriteStringCenter: PROTO, :PTR BYTE, :PTR BYTE
 
 HandleStartMenu PROC USES ebx ecx edx
-	LOCAL cwidth:	DWORD
-	LOCAL cheight:	DWORD
-
 	call Clrscr
-
-	call GetMaxXY
-	movzx eax, dl
-	mov  cwidth, eax
-	movzx eax, dh
-	mov  cheight, eax
-
-	invoke ShowStartMenu, cwidth, cheight
+	call ShowStartMenu
 	
 key_listening_loop:
 	mov  eax, 50
@@ -57,7 +45,7 @@ key_listening_loop:
 
 		mov NowSelected, ebx
 		call Clrscr
-		invoke ShowStartMenu, cwidth, cheight
+		call ShowStartMenu
 
 		pop ebx
 	.ENDIF
@@ -68,17 +56,16 @@ key_listening_loop:
 		ret
 	.ENDIF
 
-	cmp    dx, VK_ESCAPE  ; time to quit?
-    jne    key_listening_loop    ; no, go get next key.
+	cmp dx, VK_ESCAPE		; time to quit?
+    jne key_listening_loop 	; no, go get next key.
+	mov	eax, 2				; set eax to exit flag
 	ret
 HandleStartMenu ENDP
 
-ShowStartMenu PROC,
-	cwidth: DWORD,
-	cheight: DWORD
+ShowStartMenu PROC
 
 	; Write Title
-	invoke WriteStringCenter, OFFSET TitleMsg, cwidth, cheight, NULL
+	invoke WriteStringCenter, OFFSET TitleMsg, NULL
 
 	call Crlf
 	call Crlf
@@ -90,9 +77,9 @@ print_option_loop:
 	mov edx, OptionMsgs[eax * TYPE OptionMsgs]
 	
 	.IF eax == NowSelected
-		invoke WriteStringCenter, edx, cwidth, cheight, OFFSET OptionSelector
+		invoke WriteStringCenter, edx, OFFSET OptionSelector
 	.ELSE
-		invoke WriteStringCenter, edx, cwidth, cheight, NULL
+		invoke WriteStringCenter, edx, NULL
 	.ENDIF
 
 	inc eax

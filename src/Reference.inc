@@ -1,2 +1,2 @@
-GameWidth	= 100
-GameHeight	= 30
+GAME_WIDTH	= 100
+GAME_HEIGHT	= 30
