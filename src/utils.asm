@@ -49,77 +49,62 @@ padding_loop:
 	ret
 WriteStringCenter ENDP
 
-SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
-
+; ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE
 	
-	mov esi, StringPtr
-	mov edi, Result
-	add esi, StartPos
+; 	LOCAL StartPos: DWORD
 
-	mov ecx, Len
-	cld
-	rep movsb
-
-	ret
-
-SubString ENDP
-
-ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE
+; 	mov ecx, 30
+; 	mov StartPos, 0
+; 	mov edi, 0
 	
-	LOCAL StartPos: DWORD
+; copy_substring:	
 
-	mov ecx, 30
-	mov StartPos, 0
-	mov edi, 0
+;     ; 在堆上分配的地址传递给 SubString
+;     invoke SubString, bufferPtr, StartPos, 120, eax	
+
+; 	mov edx, eax
+; 	call WriteString
+
+; 	mov  [Scene + edi], eax ;TODO 
+
+; 	add StartPos, 120
+; 	add edi, 4 
+
+; 	invoke HeapFree, HeapHandle, 0, eax
+; 	loop copy_substring	
+
+; 	ret
+; ProcessBuffer ENDP
+
+
+; ReadMapFromFile PROC USES eax ecx edx
+; 	LOCAL bytesRead: DWORD
+; 	LOCAL fileHandle: DWORD
 	
-copy_substring:	
+; 	; Read File
+; 	lea edx, fileName
+;     call OpenInputFile
+;     mov fileHandle, eax    
 
-    ; 在堆上分配的地址传递给 SubString
-    invoke SubString, bufferPtr, StartPos, 120, eax	
-
-	mov edx, eax
-	call WriteString
-
-	mov  [Scene + edi], eax ;TODO 
-
-	add StartPos, 120
-	add edi, 4 
-
-	invoke HeapFree, HeapHandle, 0, eax
-	loop copy_substring	
-
-	ret
-ProcessBuffer ENDP
-
-
-ReadMapFromFile PROC USES eax ecx edx
-	LOCAL bytesRead: DWORD
-	LOCAL fileHandle: DWORD
-	
-	; Read File
-	lea edx, fileName
-    call OpenInputFile
-    mov fileHandle, eax    
-
-	mov eax, fileHandle
-    mov edx, OFFSET buffer
-    mov ecx, 5000
-    call ReadFromFile
-    jc show_error_message
-    mov bytesRead, eax
+; 	mov eax, fileHandle
+;     mov edx, OFFSET buffer
+;     mov ecx, 5000
+;     call ReadFromFile
+;     jc show_error_message
+;     mov bytesRead, eax
 	
 	
-	invoke ProcessBuffer, OFFSET buffer
-	call DumpRegs
+; 	invoke ProcessBuffer, OFFSET buffer
+; 	call DumpRegs
 	
-	mov edx, [Scene]
-	call WriteString
-	ret
+; 	mov edx, [Scene]
+; 	call WriteString
+; 	ret
 
-show_error_message: 
-	call WriteWindowsMsg
-	ret
-ReadMapFromFile ENDP
+; show_error_message: 
+; 	call WriteWindowsMsg
+; 	ret
+; ReadMapFromFile ENDP
 
 ; ProcessBuffer PROC USES eax ecx edx, ResultPtr: PTR DWORD, bufferPtr: PTR BYTE
 ; 	LOCAL StringLen: DWORD
