@@ -7,6 +7,14 @@ INCLUDE Reference.inc
 fileName BYTE "data", 0
 buffer BYTE 5000 DUP(?)
 
+; ----- Indexed String Area
+	GAME_NAME BYTE "the game"
+	
+
+	IndexedStrList DWORD \
+		OFFSET GAME_NAME
+; -----
+
 .code
 
 SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
@@ -122,5 +130,10 @@ SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, L
 	ret
 SubString ENDP
 
+GetIndexedStr PROC USES ebx, index: DWORD
+	mov ebx, index
+	mov eax, IndexedStrList[ebx]
+	ret
+GetIndexedStr ENDP
 
 END

@@ -26,9 +26,6 @@ main PROC
 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
 	exit
 game_start:
-
-	; call ShowMap
-	
 	call HandleStartMenu
 
 	.IF eax == 2

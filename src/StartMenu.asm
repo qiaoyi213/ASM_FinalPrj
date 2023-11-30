@@ -1,9 +1,8 @@
 INCLUDE Irvine32.inc
 INCLUDE Macros.inc
+INCLUDE Reference.inc
 
 .data
-	TitleMsg BYTE "Welcome to the game", 0
-
 	OptionMsgStart	BYTE "Start", 0
 	OptionMsgConfig	BYTE "Setting", 0
 	OptionMsgExit	BYTE "Close", 0
@@ -13,6 +12,7 @@ INCLUDE Macros.inc
 	NowSelected	DWORD 0
 .code
 	extern WriteStringCenter: PROTO, :PTR BYTE, :PTR BYTE
+	extern GetIndexedStr: PROTO, :DWORD
 
 HandleStartMenu PROC USES ebx ecx edx
 	call Clrscr
@@ -65,7 +65,9 @@ HandleStartMenu ENDP
 ShowStartMenu PROC
 
 	; Write Title
-	invoke WriteStringCenter, OFFSET TitleMsg, NULL
+	
+	invoke GetIndexedStr, GAME_NAME_STRI
+	invoke WriteStringCenter, eax, NULL
 
 	call Crlf
 	call Crlf
