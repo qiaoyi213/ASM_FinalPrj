@@ -9,12 +9,12 @@ Scene DWORD 30 DUP(?)
 
 extern ReadMapFromFile: PROTO 
 
-ShowMap PROC USES eax ebx ecx edx
+; ShowMap PROC USES eax ebx ecx edx
  
-	invoke ReadMapFromFile
+; 	invoke ReadMapFromFile
 
-	ret
+; 	ret
 
-ShowMap ENDP
+; ShowMap ENDP
 
 END
