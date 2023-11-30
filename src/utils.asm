@@ -1,21 +1,11 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
 
-INCLUDE Reference.inc
-
 .data
 fileName BYTE "data", 0
 buffer BYTE 5000 DUP(?)
 Scene LABEL DWORD; Array of pointer to BYTE 
 HeapHandle        HANDLE ?
-
-; ----- Indexed String Area
-	GAME_NAME BYTE "the game"
-	
-
-	IndexedStrList DWORD \
-		OFFSET GAME_NAME
-; -----
 
 .code
 
@@ -175,11 +165,5 @@ SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, L
 
 	ret
 SubString ENDP
-
-GetIndexedStr PROC USES ebx, index: DWORD
-	mov ebx, index
-	mov eax, IndexedStrList[ebx]
-	ret
-GetIndexedStr ENDP
 
 END
