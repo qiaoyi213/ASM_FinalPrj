@@ -2,7 +2,7 @@ INCLUDE Irvine32.inc
 
 .data
 ; ----- Indexed String Area
-	GAME_NAME BYTE "the game"
+	GAME_NAME BYTE "the game", 0
 	
 
 	IndexedStrList DWORD \
