@@ -1,5 +1,6 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
+INCLUDE Reference.inc
 
 .data
 fileName BYTE "data", 0
@@ -120,50 +121,50 @@ show_error_message:
 	ret
 ReadMapFromFile ENDP
 
-ProcessBuffer PROC USES eax ecx edx, ResultPtr: PTR DWORD, bufferPtr: PTR BYTE
-	LOCAL StringLen: DWORD
-	LOCAL tmpStr: PTR BYTE
+; ProcessBuffer PROC USES eax ecx edx, ResultPtr: PTR DWORD, bufferPtr: PTR BYTE
+; 	LOCAL StringLen: DWORD
+; 	LOCAL tmpStr: PTR BYTE
 
-	mov ecx, 30 
-	mov esi, 0
-	mov edi, ResultPtr
+; 	mov ecx, 30 
+; 	mov esi, 0
+; 	mov edi, ResultPtr
 	
-copy_substring:	
+; copy_substring:	
 
-	call DumpRegs
-	invoke SubString, bufferPtr, esi, 120, tmpStr
+; 	call DumpRegs
+; 	invoke SubString, bufferPtr, esi, 120, tmpStr
 	
-	mov edi, tmpStr
-	add esi, 30
-	add edi, 4
-	loop copy_substring	
-ProcessBuffer ENDP
+; 	mov edi, tmpStr
+; 	add esi, 30
+; 	add edi, 4
+; 	loop copy_substring	
+; ProcessBuffer ENDP
 
-SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
-	LOCAL StringLen: DWORD
+; SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
+; 	LOCAL StringLen: DWORD
 
-	mov edx, StringPtr
-	call StrLength
-	mov StringLen, eax
+; 	mov edx, StringPtr
+; 	call StrLength
+; 	mov StringLen, eax
 
-	mov esi, StringPtr
-	mov edi, Result
+; 	mov esi, StringPtr
+; 	mov edi, Result
 	
-	mov eax, StringPtr
-	mov ebx, 4
-	call WriteHexB
+; 	mov eax, StringPtr
+; 	mov ebx, 4
+; 	call WriteHexB
 
-	cld
-	mov ecx, 120
-	rep movsb
+; 	cld
+; 	mov ecx, 120
+; 	rep movsb
 	
-	mWrite "A"
+; 	mWrite "A"
 
 
-	mov edx, StringPtr
-	call WriteString
+; 	mov edx, StringPtr
+; 	call WriteString
 
-	ret
-SubString ENDP
+; 	ret
+; SubString ENDP
 
 END
