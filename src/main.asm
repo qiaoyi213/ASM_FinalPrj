@@ -40,8 +40,8 @@ game_start:
 		mov edx, OFFSET SettingMsg
 		call WriteString
 	.ENDIF
+	
 	ret
-
 main ENDP
 
 
