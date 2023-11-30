@@ -20,7 +20,7 @@ main PROC
 	invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
 
-	; call ShowMap
+	 call ShowMap
 	
 	; call HandleStartMenu
 

@@ -4,15 +4,16 @@ INCLUDE Irvine32.inc
 
 BUFSIZE = 5000
 buffer BYTE BUFSIZE DUP(?)
-Scene DWORD 30 DUP(?) 
+fileName BYTE "data", 0
 .code
 
-extern ReadMapFromFile: PROTO 
+extern ReadMapFromFile: PROTO, :PTR BYTE, :PTR BYTE
 
 ShowMap PROC USES eax ebx ecx edx
  
-	invoke ReadMapFromFile
-
+	invoke ReadMapFromFile, OFFSET buffer, OFFSET fileName
+	mov edx, OFFSET buffer
+	call WriteString
 	ret
 
 ShowMap ENDP

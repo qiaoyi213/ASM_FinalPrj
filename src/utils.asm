@@ -1,14 +1,8 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
 .data
-fileName BYTE "data", 0
-buffer BYTE 5000 DUP(?)
-Scene LABEL DWORD ; Array of pointer to BYTE 
-HeapHandle        HANDLE ?
-.code
 
-SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
-ProcessBuffer PROTO,  :PTR BYTE
+.code
 
 WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, cwidth: DWORD, cheight: DWORD, leftDecoPtr: PTR BYTE
 	LOCAL StringLen: 	 	DWORD
@@ -61,57 +55,25 @@ SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, L
 
 SubString ENDP
 
-ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE ; 將 bufferPtr 的值切分成 30 行 每行 120 字，存在 Scene 中 (TODO)
-	LOCAL StartPos: DWORD
 
-	
-
-	mov ecx, 30
-	mov StartPos, 0
-	mov edi, 0
-	
-copy_substring:	
-
-    ; 在堆上分配的地址传递给 SubString
-    invoke SubString, bufferPtr, StartPos, 120, eax	
-
-	mov edx, eax
-	call WriteString
-
-	mov  [Scene + edi], eax ;TODO 
-
-	add StartPos, 120
-	add edi, 4 
-
-	invoke HeapFree, HeapHandle, 0, eax
-	loop copy_substring	
-
-	ret
-ProcessBuffer ENDP
-
-
-ReadMapFromFile PROC USES eax ecx edx
+ReadMapFromFile PROC USES eax ecx edx, buffer: PTR BYTE, fileName: PTR BYTE
 	LOCAL bytesRead: DWORD
 	LOCAL fileHandle: DWORD
 	
 	; Read File
-	lea edx, fileName
+	mov edx, fileName
     call OpenInputFile
     mov fileHandle, eax    
 
 	mov eax, fileHandle
-    mov edx, OFFSET buffer
+    mov edx, buffer
     mov ecx, 5000
     call ReadFromFile
     jc show_error_message
     mov bytesRead, eax
 	
-	
-	invoke ProcessBuffer, OFFSET buffer
-	call DumpRegs
-	
-	mov edx, [Scene]
-	call WriteString
+	;mov edx, buffer
+	;call WriteString
 	ret
 
 show_error_message: 
