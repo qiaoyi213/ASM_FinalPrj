@@ -66,7 +66,7 @@ ShowStartMenu PROC
 
 	; Write Title
 	
-	invoke GetIndexedStr, GAME_NAME_STRI
+	invoke GetIndexedStr, GAME_NAME_INDEX
 	invoke WriteStringCenter, eax, NULL
 
 	call Crlf
