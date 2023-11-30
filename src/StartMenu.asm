@@ -9,13 +9,25 @@ INCLUDE Reference.inc
 	OptionSelector	BYTE "> ", 0
 
 	OptionMsgs		DWORD OFFSET OptionMsgStart, OFFSET OptionMsgConfig, OFFSET OptionMsgExit
-	NowSelected	DWORD 0
+	NowSelected		DWORD 0
+
+	TitleMsg1		BYTE "Welcome to ", 0
+	TitleMsg2		BYTE ", use arrow and enter key to select.", 0
+	TitleMsgBuffer	BYTE 100 DUP(0)
 .code
 	extern WriteStringCenter: PROTO, :PTR BYTE, :PTR BYTE
 	extern GetIndexedStr: PROTO, :DWORD
+	extern AppendString: PROTO, :PTR BYTE, :PTR BYTE
 
 HandleStartMenu PROC USES ebx ecx edx
 	call Clrscr
+
+	; set title
+	invoke AppendString, OFFSET TitleMsgBuffer, OFFSET TitleMsg1
+	invoke GetIndexedStr, GAME_NAME_INDEX
+	invoke AppendString, OFFSET TitleMsgBuffer, eax
+	invoke AppendString, OFFSET TitleMsgBuffer, OFFSET TitleMsg2
+
 	call ShowStartMenu
 	
 key_listening_loop:
@@ -65,9 +77,7 @@ HandleStartMenu ENDP
 ShowStartMenu PROC
 
 	; Write Title
-	
-	invoke GetIndexedStr, GAME_NAME_INDEX
-	invoke WriteStringCenter, eax, NULL
+	invoke WriteStringCenter, OFFSET TitleMsgBuffer, NULL
 
 	call Crlf
 	call Crlf
