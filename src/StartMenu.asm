@@ -13,7 +13,7 @@ INCLUDE Reference.inc
 
 	TitleMsg1		BYTE "Welcome to ", 0
 	TitleMsg2		BYTE ", use arrow and enter key to select.", 0
-	TitleMsgBuffer	BYTE 100 DUP(0)
+	TitleMsgBuffer	BYTE 100 DUP(?)
 .code
 	extern WriteStringCenter: PROTO, :PTR BYTE, :PTR BYTE
 	extern GetIndexedStr: PROTO, :DWORD

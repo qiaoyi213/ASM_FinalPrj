@@ -3,10 +3,6 @@ INCLUDE macros.inc
 INCLUDE Reference.inc
 
 .data
-fileName BYTE "data", 0
-buffer BYTE 5000 DUP(?)
-Scene LABEL DWORD; Array of pointer to BYTE 
-HeapHandle        HANDLE ?
 
 .code
 
@@ -124,32 +120,5 @@ WriteStringCenter ENDP
 ; 	add edi, 4
 ; 	loop copy_substring	
 ; ProcessBuffer ENDP
-
-; SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
-; 	LOCAL StringLen: DWORD
-
-; 	mov edx, StringPtr
-; 	call StrLength
-; 	mov StringLen, eax
-
-; 	mov esi, StringPtr
-; 	mov edi, Result
-	
-; 	mov eax, StringPtr
-; 	mov ebx, 4
-; 	call WriteHexB
-
-; 	cld
-; 	mov ecx, 120
-; 	rep movsb
-	
-; 	mWrite "A"
-
-
-; 	mov edx, StringPtr
-; 	call WriteString
-
-; 	ret
-; SubString ENDP
 
 END

@@ -13,6 +13,7 @@ NormalCursorInfo CONSOLE_CURSOR_INFO <?, ?>
 .code
 extern HandleStartMenu: PROC
 extern Boot: PROC
+extern ShowMap: PROC
 
 main PROC
 	invoke GetStdHandle, STD_OUTPUT_HANDLE
@@ -35,7 +36,7 @@ game_start:
 		exit
 	.ELSEIF eax == 0
 		mov edx, OFFSET StartGameMsg
-		; call ShowMap
+		call ShowMap
 	.ELSEIF eax == 1
 		mov edx, OFFSET SettingMsg
 		call WriteString
