@@ -15,10 +15,10 @@ extern HandleStartMenu: PROC
 extern ShowMap: PROC
 
 main PROC
-	invoke GetStdHandle, STD_OUTPUT_HANDLE
-	mov stdoutHandle, eax
-	invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
-	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
+	; invoke GetStdHandle, STD_OUTPUT_HANDLE
+	; mov stdoutHandle, eax
+	; invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
+	; invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
 
 	 call ShowMap
 	

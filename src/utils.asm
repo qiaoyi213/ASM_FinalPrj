@@ -60,11 +60,12 @@ ReadMapFromFile PROC USES eax ecx edx, buffer: PTR BYTE, fileName: PTR BYTE
 	LOCAL bytesRead: DWORD
 	LOCAL fileHandle: DWORD
 	
-	; Read File
+	
+	; Get FIle handle
 	mov edx, fileName
     call OpenInputFile
     mov fileHandle, eax    
-
+	; Read File to buffer
 	mov eax, fileHandle
     mov edx, buffer
     mov ecx, 5000
@@ -72,13 +73,25 @@ ReadMapFromFile PROC USES eax ecx edx, buffer: PTR BYTE, fileName: PTR BYTE
     jc show_error_message
     mov bytesRead, eax
 	
-	;mov edx, buffer
-	;call WriteString
 	ret
 
 show_error_message: 
 	call WriteWindowsMsg
 	ret
 ReadMapFromFile ENDP
+
+GetItem PROC USES eax edx esi,  arr: PTR BYTE,i: WORD, j: WORD, Result: PTR BYTE
+	
+	mov esi, arr
+	movzx eax, i
+	imul j
+	add esi, eax
+
+	mov al, [esi]
+	movzx eax, al
+	mov [Result], eax
+	
+	ret 
+GetItem ENDP
 
 END
