@@ -4,6 +4,7 @@ INCLUDE Reference.inc
 
 .data
 
+
 .code
 
 SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
