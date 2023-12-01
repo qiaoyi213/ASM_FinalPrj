@@ -20,7 +20,7 @@ ShowMap PROC USES eax ebx ecx edx
 	
 	; invoke GetItem, OFFSET buffer, 0, 0, ADDR tmp
 	; invoke GetItem, OFFSET buffer, 1,0
-	invoke ShowPart, 0,0, 3, 2 
+	; invoke ShowPart, 0,0, 120, 30
 
 	ret
 

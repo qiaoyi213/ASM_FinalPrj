@@ -13,15 +13,15 @@ NormalCursorInfo CONSOLE_CURSOR_INFO <?, ?>
 .code
 extern HandleStartMenu: PROC
 extern ShowMap: PROC
-
+extern Game: PROC
 main PROC
 	; invoke GetStdHandle, STD_OUTPUT_HANDLE
 	; mov stdoutHandle, eax
 	; invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
 	; invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
 
-	 call ShowMap
-	
+	;call ShowMap
+	call Game
 	; call HandleStartMenu
 
 	; .IF eax == 2
