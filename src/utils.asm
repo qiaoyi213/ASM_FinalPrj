@@ -1,10 +1,16 @@
 INCLUDE Irvine32.inc
 INCLUDE macros.inc
+INCLUDE Reference.inc
+
 .data
+
 
 .code
 
-WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, cwidth: DWORD, cheight: DWORD, leftDecoPtr: PTR BYTE
+SubString PROTO, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
+ProcessBuffer PROTO,  :PTR BYTE
+
+WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, leftDecoPtr: PTR BYTE
 	LOCAL StringLen: 	 	DWORD
 	LOCAL StringPadding:	DWORD
 
@@ -12,7 +18,7 @@ WriteStringCenter PROC USES eax ecx edx, StringPtr: PTR BYTE, cwidth: DWORD, che
 	call StrLength
 	mov  StringLen, eax
 
-	mov  edx, cwidth
+	mov  edx, GAME_WIDTH
 	mov  StringPadding, edx
 	mov  edx, StringLen
 	sub  StringPadding, edx
@@ -40,62 +46,81 @@ padding_loop:
 	ret
 WriteStringCenter ENDP
 
-SubString PROC USES eax ecx edx esi edi, StringPtr: PTR BYTE, StartPos: DWORD, Len: DWORD,  Result: PTR BYTE
+; ProcessBuffer PROC USES eax ecx edx esi edi, bufferPtr: PTR BYTE
+	
+; 	LOCAL StartPos: DWORD
+
+; 	mov ecx, 30
+; 	mov StartPos, 0
+; 	mov edi, 0
+	
+; copy_substring:	
+
+;     ; 在堆上分配的地址传递给 SubString
+;     invoke SubString, bufferPtr, StartPos, 120, eax	
+
+; 	mov edx, eax
+; 	call WriteString
+
+; 	mov  [Scene + edi], eax ;TODO 
+
+; 	add StartPos, 120
+; 	add edi, 4 
+
+; 	invoke HeapFree, HeapHandle, 0, eax
+; 	loop copy_substring	
+
+; 	ret
+; ProcessBuffer ENDP
+
+
+; ReadMapFromFile PROC USES eax ecx edx
+; 	LOCAL bytesRead: DWORD
+; 	LOCAL fileHandle: DWORD
+	
+; 	; Read File
+; 	lea edx, fileName
+;     call OpenInputFile
+;     mov fileHandle, eax    
+
+; 	mov eax, fileHandle
+;     mov edx, OFFSET buffer
+;     mov ecx, 5000
+;     call ReadFromFile
+;     jc show_error_message
+;     mov bytesRead, eax
+	
+	
+; 	invoke ProcessBuffer, OFFSET buffer
+; 	call DumpRegs
+	
+; 	mov edx, [Scene]
+; 	call WriteString
+; 	ret
+
+; show_error_message: 
+; 	call WriteWindowsMsg
+; 	ret
+; ReadMapFromFile ENDP
+
+; ProcessBuffer PROC USES eax ecx edx, ResultPtr: PTR DWORD, bufferPtr: PTR BYTE
+; 	LOCAL StringLen: DWORD
+; 	LOCAL tmpStr: PTR BYTE
+
+; 	mov ecx, 30 
+; 	mov esi, 0
+; 	mov edi, ResultPtr
+	
+; copy_substring:	
+
+; 	call DumpRegs
+; 	invoke SubString, bufferPtr, esi, 120, tmpStr
 
 	
-	mov esi, StringPtr
-	mov edi, Result
-	add esi, StartPos
-
-	mov ecx, Len
-	cld
-	rep movsb
-
-	ret
-
-SubString ENDP
-
-
-ReadMapFromFile PROC USES eax ecx edx, buffer: PTR BYTE, fileName: PTR BYTE
-	LOCAL bytesRead: DWORD
-	LOCAL fileHandle: DWORD
-	
-	
-	; Get FIle handle
-	mov edx, fileName
-    call OpenInputFile
-    mov fileHandle, eax    
-	; Read File to buffer
-	mov eax, fileHandle
-    mov edx, buffer
-    mov ecx, 5000
-    call ReadFromFile
-    jc show_error_message
-    mov bytesRead, eax
-	
-	ret
-
-show_error_message: 
-	call WriteWindowsMsg
-	ret
-ReadMapFromFile ENDP
-
-GetItem PROC USES eax ebx edx esi,  arr: PTR BYTE,i: WORD, j: WORD
-	
-	mov esi, arr
-	movzx eax, i
-	mov ebx, 122
-	imul ebx
-	add esi, eax
-	movzx ebx, j
-	add esi, ebx
-
-	mov al, [esi]
-	call WriteChar
-	; movzx eax, al
-	; mov [Result], eax
-	
-	ret 
-GetItem ENDP
+; 	mov edi, tmpStr
+; 	add esi, 30
+; 	add edi, 4
+; 	loop copy_substring	
+; ProcessBuffer ENDP
 
 END

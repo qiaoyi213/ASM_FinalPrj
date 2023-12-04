@@ -2,33 +2,52 @@ INCLUDE Irvine32.inc
 
 
 .data
+
+level		DWORD 1
+isInRoom	DWORD 0
+
  
 .code
 
-extern ShowMap: PROTO
-extern ShowPart: PROTO, :WORD, : WORD, : WORD, : WORD
+Game_init PROC
+	
+Game_init ENDP
 
-Game PROC USES eax ebx
-	LOCAL maxV: WORD
-    invoke ShowMap
+Game_loop PROC USES eax
+main_loop:	; expect to be 20 fps
+	call KeyHandle
 
-    mov bx, 0
-    mov ecx, 120
-
-
-game_update_loop:
-    mov eax, 50
+	call Game_Render
+	
+	call Game_Moving
+	
+	mov  eax, 50
     call Delay
-    mov maxV, bx
-    call Clrscr
-    invoke ShowPart, 0, 0, maxV, 29
 
-    
-    inc bx
-    loop game_update_loop
+	ret
+Game_loop ENDP
 
-    
-    ret
-Game ENDP
+Game_Render PROC
+	; call ShowMap
+	; call Player_Render
+	; call Enimies_Render
+	; call Projectiles_Render
+
+	ret
+Game_Render ENDP
+
+Game_Moving PROC
+	; call Player_moving
+	; call Enimies_moving
+	; call Projectiles_moving
+
+	ret
+Game_Moving ENDP
+
+Game_getLevel PROC
+	mov eax, level
+	ret
+Game_getLevel ENDP
+
 
 END

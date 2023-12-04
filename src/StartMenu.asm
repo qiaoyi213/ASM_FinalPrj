@@ -1,34 +1,34 @@
 INCLUDE Irvine32.inc
 INCLUDE Macros.inc
+INCLUDE Reference.inc
 
 .data
-	TitleMsg BYTE "Welcome to the game", 0
-
 	OptionMsgStart	BYTE "Start", 0
 	OptionMsgConfig	BYTE "Setting", 0
 	OptionMsgExit	BYTE "Close", 0
 	OptionSelector	BYTE "> ", 0
 
 	OptionMsgs		DWORD OFFSET OptionMsgStart, OFFSET OptionMsgConfig, OFFSET OptionMsgExit
-	NowSelected	DWORD 0
-.code
-	extern WriteStringCenter: PROTO, :PTR BYTE, :DWORD, :DWORD, :PTR BYTE
+	NowSelected		DWORD 0
 
-	ShowStartMenu PROTO, :DWORD, :DWORD
+	TitleMsg1		BYTE "Welcome to ", 0
+	TitleMsg2		BYTE ", use arrow and enter key to select.", 0
+	TitleMsgBuffer	BYTE 100 DUP(?)
+.code
+	extern WriteStringCenter: PROTO, :PTR BYTE, :PTR BYTE
+	extern GetIndexedStr: PROTO, :DWORD
+	extern AppendString: PROTO, :PTR BYTE, :PTR BYTE
 
 HandleStartMenu PROC USES ebx ecx edx
-	LOCAL cwidth:	DWORD
-	LOCAL cheight:	DWORD
-
 	call Clrscr
 
-	call GetMaxXY
-	movzx eax, dl
-	mov  cwidth, eax
-	movzx eax, dh
-	mov  cheight, eax
+	; set title
+	invoke AppendString, OFFSET TitleMsgBuffer, OFFSET TitleMsg1
+	invoke GetIndexedStr, GAME_NAME_INDEX
+	invoke AppendString, OFFSET TitleMsgBuffer, eax
+	invoke AppendString, OFFSET TitleMsgBuffer, OFFSET TitleMsg2
 
-	invoke ShowStartMenu, cwidth, cheight
+	call ShowStartMenu
 	
 key_listening_loop:
 	mov  eax, 50
@@ -57,7 +57,7 @@ key_listening_loop:
 
 		mov NowSelected, ebx
 		call Clrscr
-		invoke ShowStartMenu, cwidth, cheight
+		call ShowStartMenu
 
 		pop ebx
 	.ENDIF
@@ -68,17 +68,16 @@ key_listening_loop:
 		ret
 	.ENDIF
 
-	cmp    dx, VK_ESCAPE  ; time to quit?
-    jne    key_listening_loop    ; no, go get next key.
+	cmp dx, VK_ESCAPE		; time to quit?
+    jne key_listening_loop 	; no, go get next key.
+	mov	eax, 2				; set eax to exit flag
 	ret
 HandleStartMenu ENDP
 
-ShowStartMenu PROC,
-	cwidth: DWORD,
-	cheight: DWORD
+ShowStartMenu PROC
 
 	; Write Title
-	invoke WriteStringCenter, OFFSET TitleMsg, cwidth, cheight, NULL
+	invoke WriteStringCenter, OFFSET TitleMsgBuffer, NULL
 
 	call Crlf
 	call Crlf
@@ -90,9 +89,9 @@ print_option_loop:
 	mov edx, OptionMsgs[eax * TYPE OptionMsgs]
 	
 	.IF eax == NowSelected
-		invoke WriteStringCenter, edx, cwidth, cheight, OFFSET OptionSelector
+		invoke WriteStringCenter, edx, OFFSET OptionSelector
 	.ELSE
-		invoke WriteStringCenter, edx, cwidth, cheight, NULL
+		invoke WriteStringCenter, edx, NULL
 	.ENDIF
 
 	inc eax
