@@ -115,6 +115,7 @@ WriteStringCenter ENDP
 
 ; 	call DumpRegs
 ; 	invoke SubString, bufferPtr, esi, 120, tmpStr
+
 	
 ; 	mov edi, tmpStr
 ; 	add esi, 30

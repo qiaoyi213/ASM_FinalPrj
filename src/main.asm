@@ -14,7 +14,7 @@ NormalCursorInfo CONSOLE_CURSOR_INFO <?, ?>
 extern HandleStartMenu: PROC
 extern Boot: PROC
 extern ShowMap: PROC
-
+extern Game: PROC
 main PROC
 	call Boot
 
@@ -38,7 +38,7 @@ game_start:
 		mov edx, OFFSET SettingMsg
 		call WriteString
 	.ENDIF
-	
+
 	ret
 main ENDP
 
