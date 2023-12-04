@@ -7,3 +7,5 @@ INCLUDE WINDOWS.inc
 StartMenu_init PROC
 
 StartMenu_init ENDP
+
+END
