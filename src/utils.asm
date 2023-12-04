@@ -80,16 +80,20 @@ show_error_message:
 	ret
 ReadMapFromFile ENDP
 
-GetItem PROC USES eax edx esi,  arr: PTR BYTE,i: WORD, j: WORD, Result: PTR BYTE
+GetItem PROC USES eax ebx edx esi,  arr: PTR BYTE,i: WORD, j: WORD
 	
 	mov esi, arr
 	movzx eax, i
-	imul j
+	mov ebx, 122
+	imul ebx
 	add esi, eax
+	movzx ebx, j
+	add esi, ebx
 
 	mov al, [esi]
-	movzx eax, al
-	mov [Result], eax
+	call WriteChar
+	; movzx eax, al
+	; mov [Result], eax
 	
 	ret 
 GetItem ENDP
