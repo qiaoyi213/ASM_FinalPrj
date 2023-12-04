@@ -16,16 +16,13 @@ extern Boot: PROC
 extern ShowMap: PROC
 
 main PROC
-	; invoke GetStdHandle, STD_OUTPUT_HANDLE
-	; mov stdoutHandle, eax
-	; invoke GetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
-	; invoke SetConsoleCursorInfo, stdoutHandle, OFFSET IngameCursorInfo
-
 	call Boot
-	cmp eax, 0
+
+	cmp eax, 0		; check if window size ok
 	jne game_start
 	invoke SetConsoleCursorInfo, stdoutHandle, OFFSET NormalCursorInfo
 	exit
+
 game_start:
 	call HandleStartMenu
 
@@ -36,7 +33,7 @@ game_start:
 		exit
 	.ELSEIF eax == 0
 		mov edx, OFFSET StartGameMsg
-		call ShowMap
+		call Game_init
 	.ELSEIF eax == 1
 		mov edx, OFFSET SettingMsg
 		call WriteString
