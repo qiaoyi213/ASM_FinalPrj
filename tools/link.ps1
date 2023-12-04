@@ -1,6 +1,7 @@
 # CONFIG ZONE #
 $LIBRARY_DIRS_ARRAY = @(
-	"Irvine"
+	"Irvine",
+	"C:\UASM\lib"
 )
 
 $LIBRARY_NAME_ARRAY = @(
