@@ -5,7 +5,7 @@ Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 
 .data
 
-ClassName		BYTE		"SimpleWinClass", 0
+ClassName		BYTE		"SimpleWinClass", 0		; don't change this
 windowTitle		BYTE		"The Game", 0
 hInstance		HINSTANCE	?
 hwnd			HWND		?
@@ -45,21 +45,23 @@ Window_init PROC
 	invoke  ShowWindow, hwnd, SW_SHOWDEFAULT
 	invoke  UpdateWindow, hwnd
  
-gt_msg:
-	invoke  GetMessage,OFFSET msg,NULL,0,0
-	or      eax,eax
-	jz      wm_qut
-	invoke  TranslateMessage,OFFSET msg
-	invoke  DispatchMessage,OFFSET msg
-	jmp     gt_msg
-wm_qut:
-	mov     eax,msg.wParam                  ;程式結束
-	invoke  ExitProcess,eax
+message_handling:
+	invoke  GetMessage, OFFSET msg, NULL, 0, 0
+	cmp     eax, 0
+	jz      message_quit
+	invoke  TranslateMessage, OFFSET msg
+	invoke  DispatchMessage, OFFSET msg
+	jmp     message_handling
+message_quit:
+	mov     eax, msg.wParam
+	invoke  ExitProcess, eax
 	ret
 Window_init ENDP
 
 Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
-	.IF uMsg == WM_DESTROY
+	.IF uMsg == WM_PAINT
+		
+	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
 		ret
@@ -69,5 +71,9 @@ msg_process:
 	
 	ret
 Window_Process ENDP
+
+Window_Paint_Handle PROC
+
+Window_Paint_Handle ENDP
 
 END
