@@ -7,7 +7,8 @@ $LIBRARY_DIRS_ARRAY = @(
 $LIBRARY_NAME_ARRAY = @(
 	"Irvine32",
 	"Kernel32",
-	"User32"
+	"User32",
+	"GDI32"
 )
 
 # WORKING ZONE #
