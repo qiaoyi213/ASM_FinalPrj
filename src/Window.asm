@@ -100,7 +100,8 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; invoke LoadResource, 0, eax
 		; mShow eax
 
-
+		invoke ShowCursor, FALSE
+		
 		invoke  LoadBitmap, hInstance, offset BMPName             ;078 載入位元圖
 		mShow	eax
         mov     hBitmap,eax
