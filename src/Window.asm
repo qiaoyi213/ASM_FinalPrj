@@ -1,20 +1,18 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 
-includelib      User32.lib
-includelib      gdi32.lib
-includelib      Kernel32.lib
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM 
 
 .data
 
 ClassName		BYTE		"SimpleWinClass", 0		; don't change this
 windowTitle		BYTE		"The Game", 0
+hMenu           HMENU       ?
+hwnd			HWND		?
 hInstance		HINSTANCE	?
 nxClient        dd          ?   ;023 工作區寬度
 nyClient        dd          ?   ;024 工作區高度
 hBitmap			dd			?
-hwnd			HWND		?
 ncx             dd          ?   ;025 BMP 圖檔的寬度
 ncy             dd          ?   ;026 BMP 圖檔的高度
 cPosX			dd			?
@@ -23,7 +21,7 @@ iVPos           dd          ?   ;027 垂直捲軸操縱桿位置
 iHPos           dd          ?   ;028 水平捲軸操縱桿位置
 iVMax           dd          ?   ;029 垂直捲軸最大範圍
 iHMax           dd          ?   ;030 水平捲軸最大範圍
-BMPName         db          'VBMP',0
+BMPName         db          "VBMP",0
 windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET ClassName,?>
 msg				MSG			<?>
 
@@ -52,9 +50,13 @@ Window_init PROC
 
 	invoke  RegisterClassEx, OFFSET windowClass			;註冊視窗類別
 
-	invoke  CreateWindowEx, NULL, OFFSET ClassName, OFFSET windowTitle,\
-			WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,\
-			CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL
+	invoke  CreateWindowEx,NULL,offset ClassName,offset \ 
+                NULL,WS_VSCROLL or WS_HSCROLL or \           ;058 風格
+                WS_OVERLAPPEDWINDOW,0,0,400,400,0,NULL,hInstance,NULL
+
+	; invoke  CreateWindowEx, NULL, OFFSET ClassName, OFFSET windowTitle,\
+	; 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,\
+	; 		CW_USEDEFAULT, CW_USEDEFAULT, NULL, NULL, hInstance, NULL
 	mov     hwnd, eax
 
 	invoke  ShowWindow, hwnd, SW_SHOWDEFAULT
@@ -83,28 +85,27 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		invoke LoadBitmap, hInstance, OFFSET BMPName
 		mov hBitmap, eax
 		invoke GetObject, hBitmap, SIZEOF BITMAP,ADDR bitmap
+		call DumpRegs
 		mov ecx, bitmap.bmWidth
 		mov ncx, ecx
+		mov edx, OFFSET ncx
+		call WriteString
 		mov ecx, bitmap.bmHeight
 		mov ncy, ecx
+		call DumpRegs
+
 	.ELSEIF uMsg == WM_PAINT
 		invoke BeginPaint, hWnd, ADDR ps
 		mov hdc, eax
 		invoke CreateCompatibleDC, eax
 		mov hdcMem, eax
 		invoke SelectObject, hdcMem, hBitmap
-		mov eax, cPosX
-		mov ecx, cPosY
+		mov eax, iVPos
+		mov ecx, iHPos
 		invoke BitBlt, hdc,0,0,nxClient, nyClient,hdcMem, ecx, eax, SRCCOPY
 		invoke  DeleteDC,hdcMem         ;119 釋放來源設備內容
         invoke  EndPaint,hWnd,addr ps   ;120 釋放視窗設備內容
-	.ELSEIF uMsg == WM_MOUSEMOVE
-		mov eax, lParam
-		and eax, 0ffffh
-		mov cPosX, eax
-		mov eax, lParam
-		shr eax,10h
-		mov cPosY, eax
+
 
 	.ELSEIF WM_SIZE
 		mov     eax,lParam              ;087 取得工作區大小，ECX=高度，EAX=寬度

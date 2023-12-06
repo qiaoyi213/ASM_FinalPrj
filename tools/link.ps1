@@ -29,5 +29,5 @@ $LIBRARY_NAME_ARRAY | ForEach-Object {
 }
 Write-Output $OBJ_PATHS
 
-& "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" $OBJ_PATHS $LIBRARY_FALGS
+& "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" ".\src\Window.obj" $OBJ_PATHS  $LIBRARY_FALGS 
 return $?
