@@ -100,8 +100,8 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; invoke LoadResource, 0, eax
 		; mShow eax
 
-		invoke ShowCursor, FALSE
-		
+		invoke ShowCursor, FALSE ; Hide cursor
+
 		invoke  LoadBitmap, hInstance, offset BMPName             ;078 載入位元圖
 		mShow	eax
         mov     hBitmap,eax
@@ -130,7 +130,8 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         invoke  CreateCompatibleDC,eax  ;110 建立相同的設備內容作為來源
         mov     hdcMem,eax
         invoke  SelectObject,hdcMem,hBitmap     ;112 選定來源設備內容的位元圖
-		mShow mouseY
+		; mShow mouseX
+		; mShow mouseY
         mov     eax, 0
         mov     ecx, 0
         invoke  BitBlt,hdc, mouseX,mouseY,8,8,hdcMem,\
@@ -158,7 +159,8 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		shr eax, 10h
 		mov mouseY, eax
 
-		invoke InvalidateRect, hWnd, NULL, TRUE
+		invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
+
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
