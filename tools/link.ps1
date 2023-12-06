@@ -8,10 +8,14 @@ $LIBRARY_NAME_ARRAY = @(
 	"Irvine32",
 	"Kernel32",
 	"User32",
-	"GDI32"
+	"Gdi32"
 )
 
 # WORKING ZONE #
+$RES_PATHS = @()
+Get-ChildItem ".\obj" -Filter *.res | ForEach-Object {
+	$RES_PATHS += @(".\obj\" + $_.Name)
+}
 
 $OBJ_PATHS = @(".\obj\main.obj")	# to keep main at first
 Get-ChildItem ".\obj" -Filter *.obj | ForEach-Object {
@@ -29,5 +33,5 @@ $LIBRARY_NAME_ARRAY | ForEach-Object {
 }
 Write-Output $OBJ_PATHS
 
-& "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" ".\src\Window.obj" $OBJ_PATHS  $LIBRARY_FALGS 
+& "ld.exe" "--enable-stdcall-fixup" "-A" "i386:x86_64" "-m" "i386pe" "-s" "-o" ".\build\main.exe" $RES_PATHS $OBJ_PATHS $LIBRARY_FALGS
 return $?
