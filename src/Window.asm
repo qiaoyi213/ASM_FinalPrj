@@ -32,7 +32,8 @@ rectangle2		RECT		<100,100,300,300>
 aColor			COLORREF 	00FF0000h
 bColor			COLORREF 	0000FF00h
 cColor			COLORREF 	000000FFh
-
+mouseX			DWORD		?
+mouseY			DWORD		?
 .code
 
 Window_init PROC
@@ -90,8 +91,8 @@ Window_init ENDP
 Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	local   hdc, hdcMem:HDC
 	local   ps: PAINTSTRUCT
-
 	local   bitmapABC: BITMAP           ;073 存放位元圖屬性
+
 
 	.If uMsg == WM_CREATE
 		; invoke FindResource, 0, OFFSET BMPName, OFFSET RT_BITMAP
@@ -121,16 +122,17 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 ; 		mShow bitmap.bmBits
 ; b_label:
 		; mWriteLn "Finish"
-
+	
 	.ELSEIF uMsg == WM_PAINT
 		invoke  BeginPaint,hWnd,addr ps ;108 取得視窗的設備內容
         mov     hdc, eax
         invoke  CreateCompatibleDC,eax  ;110 建立相同的設備內容作為來源
         mov     hdcMem,eax
         invoke  SelectObject,hdcMem,hBitmap     ;112 選定來源設備內容的位元圖
+		mShow mouseY
         mov     eax, 0
         mov     ecx, 0
-        invoke  BitBlt,hdc,0,0,8,8,hdcMem,\
+        invoke  BitBlt,hdc, mouseX,mouseY,8,8,hdcMem,\
                 ecx,eax,SRCCOPY         ;118 傳送位元圖到視窗的設備內容
         invoke  DeleteDC,hdcMem         ;119 釋放來源設備內容
 
@@ -146,6 +148,16 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 			; invoke	FillRect, hdc, OFFSET rectangle2, eax
 
         invoke  EndPaint,hWnd,addr ps   ;120 釋放視窗設備內容
+
+	.ELSEIF uMsg == WM_MOUSEMOVE
+		mov eax, lParam
+		and eax, 0ffffh
+		mov mouseX, eax
+		mov eax, lParam
+		shr eax, 10h
+		mov mouseY, eax
+
+		invoke InvalidateRect, hWnd, NULL, TRUE
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
