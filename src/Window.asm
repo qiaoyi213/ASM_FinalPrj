@@ -14,7 +14,7 @@ hwnd			HWND		?
 windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET ClassName,?>
 msg				MSG			<?>
 
-BMPName			DB			"VBMP", 0
+BMPName			DB			"SlimeImg", 0
 hBitmap			DWORD		?
 rectangle		RECT		<0,0,256,256>
 rectangle2		RECT		<100,100,300,300>
