@@ -7,8 +7,15 @@ if(!$r1) {
 	Write-Output "Assemble Failed"
 	exit
 }
-$r2 = & ".\tools\link.ps1" | Select-Object -Last 1
+
+$r2 = & ".\tools\resources.ps1" | Select-Object -Last 1
 if(!$r2) {
+	Write-Output "Resources Loading Failed"
+	exit
+}
+
+$r3 = & ".\tools\link.ps1" | Select-Object -Last 1
+if(!$r3) {
 	Write-Output "Link Failed"
 	exit
 }
