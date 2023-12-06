@@ -14,7 +14,6 @@ hwnd			HWND		?
 hInstance		HINSTANCE	?
 nxClient        dd          ?   ;023 工作區寬度
 nyClient        dd          ?   ;024 工作區高度
-hBitmap			dd			?
 ncx             dd          ?   ;025 BMP 圖檔的寬度
 ncy             dd          ?   ;026 BMP 圖檔的高度
 cPosX			dd			?
@@ -23,7 +22,6 @@ iVPos           dd          ?   ;027 垂直捲軸操縱桿位置
 iHPos           dd          ?   ;028 水平捲軸操縱桿位置
 iVMax           dd          ?   ;029 垂直捲軸最大範圍
 iHMax           dd          ?   ;030 水平捲軸最大範圍
-BMPName         db          "VBMP",0
 windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET ClassName,?>
 msg				MSG			<?>
 
@@ -64,7 +62,7 @@ Window_init PROC
 	invoke  RegisterClassEx, OFFSET windowClass			;註冊視窗類別
 
 	invoke  CreateWindowEx,NULL,offset ClassName,offset \ 
-                NULL,WS_VSCROLL or WS_HSCROLL or \           ;058 風格
+                NULL,           ;058 風格
                 WS_OVERLAPPEDWINDOW,0,0,400,400,0,NULL,hInstance,NULL
 
 	; invoke  CreateWindowEx, NULL, OFFSET ClassName, OFFSET windowTitle,\
