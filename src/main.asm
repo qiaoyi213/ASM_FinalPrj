@@ -8,9 +8,11 @@ INCLUDE Macros.inc
 
 .code
 	extern Window_init: PROC
-
+	
 main PROC
 	call Window_init
+
+
 	ret
 main ENDP
 
