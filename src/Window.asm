@@ -64,7 +64,7 @@ Window_init PROC
 
 	invoke  CreateWindowEx,NULL,offset ClassName,offset \ 
                 NULL,           ;058 風格
-                WS_OVERLAPPEDWINDOW,0,0,400,400,0,NULL,hInstance,NULL
+                WS_OVERLAPPEDWINDOW xor WS_THICKFRAME,0,0,1280,720,0,NULL,hInstance,NULL
 
 	; invoke  CreateWindowEx, NULL, OFFSET ClassName, OFFSET windowTitle,\
 	; 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT,\
