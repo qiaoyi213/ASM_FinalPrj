@@ -7,9 +7,5 @@ SEC DWORD 0
 
 .code
 
-Animation PROC 
-    
-    ret
-Animation ENDP
 
 END
