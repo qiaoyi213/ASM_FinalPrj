@@ -34,13 +34,13 @@ bColor			COLORREF 	0000FF00h
 cColor			COLORREF 	000000FFh
 mouseX			DWORD		?
 mouseY			DWORD		?
+
 .code
 
 
 Window_init PROC
 	invoke  GetModuleHandle, NULL
 	mov     hInstance, eax
-	
 	mShow	hInstance
 
 	mov     windowClass.style, CS_HREDRAW or CS_VREDRAW ; re draw when window resized
@@ -57,11 +57,11 @@ Window_init PROC
 	; mov     wc.hIcon,eax                    ;存入圖示代碼
 	; mov     wc.hIconSm,eax                  ;存入小圖示代碼
 
-	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR 			;取得游標代碼
+	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
+
 	mov hCursor, eax
 	mShow hCursor
 	invoke 	SetCursor, hCursor
-	; mov     windowClass.hCursor,eax						;存入游標代碼
 
 
 	invoke  RegisterClassEx, OFFSET windowClass			;註冊視窗類別
@@ -190,7 +190,6 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.ELSEIF uMsg == WM_SETCURSOR
 		mov eax, lParam
 		.IF ax == HTCLIENT
-			
 			invoke SetCursor, hCursor
 			ret
 		.ENDIF
