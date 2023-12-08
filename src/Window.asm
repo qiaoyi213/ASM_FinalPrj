@@ -12,6 +12,7 @@ windowTitle		BYTE		"The Game", 0
 hMenu           HMENU       ?
 hwnd			HWND		?
 hInstance		HINSTANCE	?
+hCursor			HCURSOR		?
 ncx             dd          ?   ;025 BMP 圖檔的寬度
 ncy             dd          ?   ;026 BMP 圖檔的高度
 cPosX			dd			?
@@ -24,6 +25,7 @@ windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET ClassName,?>
 msg				MSG			<?>
 
 BMPName			DB			"SlimeImg", 0
+CURName			DB			"cursorFile", 0
 hBitmap			DWORD		?
 rectangle		RECT		<0,0,256,256>
 rectangle2		RECT		<100,100,300,300>
@@ -55,8 +57,11 @@ Window_init PROC
 	; mov     wc.hIcon,eax                    ;存入圖示代碼
 	; mov     wc.hIconSm,eax                  ;存入小圖示代碼
 
-	invoke  LoadCursor, NULL, IDC_ARROW					;取得游標代碼
-	mov     windowClass.hCursor,eax						;存入游標代碼
+	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR 			;取得游標代碼
+	mov hCursor, eax
+	mShow hCursor
+	invoke 	SetCursor, hCursor
+	; mov     windowClass.hCursor,eax						;存入游標代碼
 
 
 	invoke  RegisterClassEx, OFFSET windowClass			;註冊視窗類別
@@ -99,7 +104,7 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; invoke LoadResource, 0, eax
 		; mShow eax
 
-		invoke ShowCursor, FALSE ; Hide cursor
+		; invoke ShowCursor, FALSE ; Hide cursor
 		
 		invoke StartMenu_init, hWnd, hdc
 		
@@ -171,14 +176,24 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
 	.ELSEIF uMsg == WM_LBUTTONUP
 		mWrite "CLICK LEFT" 
-	
+	.ELSEIF uMsg == WM_RBUTTONUP
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		; mShow eax
-		.IF ax == 132 ; Button ID defined in StartMenu.asm
+		.IF ax == 101 ; Start Button ID defined in StartMenu.asm
 			mWrite "Start Game"
+		.ELSEIF ax == 100 ; Exit 
+			invoke PostQuitMessage,NULL
+			mov eax, 0
+			ret
 		.ENDIF
-
+	.ELSEIF uMsg == WM_SETCURSOR
+		mov eax, lParam
+		.IF ax == HTCLIENT
+			
+			invoke SetCursor, hCursor
+			ret
+		.ENDIF
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
