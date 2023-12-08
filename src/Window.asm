@@ -4,7 +4,7 @@ INCLUDE WinUser.inc
 INCLUDE Macros.inc
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM 
-
+StartMenu_init PROTO, :HWND, :HDC
 .data
 
 ClassName		BYTE		"SimpleWinClass", 0		; don't change this
@@ -12,8 +12,7 @@ windowTitle		BYTE		"The Game", 0
 hMenu           HMENU       ?
 hwnd			HWND		?
 hInstance		HINSTANCE	?
-nxClient        dd          ?   ;023 工作區寬度
-nyClient        dd          ?   ;024 工作區高度
+hCursor			HCURSOR		?
 ncx             dd          ?   ;025 BMP 圖檔的寬度
 ncy             dd          ?   ;026 BMP 圖檔的高度
 cPosX			dd			?
@@ -26,6 +25,7 @@ windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET ClassName,?>
 msg				MSG			<?>
 
 BMPName			DB			"SlimeImg", 0
+CURName			DB			"cursorFile", 0
 hBitmap			DWORD		?
 rectangle		RECT		<0,0,256,256>
 rectangle2		RECT		<100,100,300,300>
@@ -34,12 +34,13 @@ bColor			COLORREF 	0000FF00h
 cColor			COLORREF 	000000FFh
 mouseX			DWORD		?
 mouseY			DWORD		?
+
 .code
+
 
 Window_init PROC
 	invoke  GetModuleHandle, NULL
 	mov     hInstance, eax
-	
 	mShow	hInstance
 
 	mov     windowClass.style, CS_HREDRAW or CS_VREDRAW ; re draw when window resized
@@ -56,8 +57,11 @@ Window_init PROC
 	; mov     wc.hIcon,eax                    ;存入圖示代碼
 	; mov     wc.hIconSm,eax                  ;存入小圖示代碼
 
-	invoke  LoadCursor, NULL, IDC_ARROW					;取得游標代碼
-	mov     windowClass.hCursor,eax						;存入游標代碼
+	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
+
+	mov hCursor, eax
+	mShow hCursor
+	invoke 	SetCursor, hCursor
 
 
 	invoke  RegisterClassEx, OFFSET windowClass			;註冊視窗類別
@@ -100,12 +104,16 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; invoke LoadResource, 0, eax
 		; mShow eax
 
-		invoke ShowCursor, FALSE ; Hide cursor
-
+		; invoke ShowCursor, FALSE ; Hide cursor
+		
+		invoke StartMenu_init, hWnd, hdc
+		
+		
 		invoke  LoadBitmap, hInstance, offset BMPName             ;078 載入位元圖
 		mShow	eax
         mov     hBitmap,eax
         invoke  GetObject,hBitmap,sizeof bitmapABC,addr bitmapABC     ;080 位元圖屬性
+
         ; mov     ecx, bitmapABC.bmWidth      ;081 位元圖寬度存於 ncx
 		; mShow ecx
         ; mov     ncx,ecx
@@ -123,8 +131,10 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 ; 		mShow bitmap.bmBits
 ; b_label:
 		; mWriteLn "Finish"
-	
+				
 	.ELSEIF uMsg == WM_PAINT
+
+
 		invoke  BeginPaint,hWnd,addr ps ;108 取得視窗的設備內容
         mov     hdc, eax
         invoke  CreateCompatibleDC,eax  ;110 建立相同的設備內容作為來源
@@ -132,6 +142,9 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         invoke  SelectObject,hdcMem,hBitmap     ;112 選定來源設備內容的位元圖
 		; mShow mouseX
 		; mShow mouseY
+		
+		
+		
         mov     eax, 0
         mov     ecx, 0
         invoke  BitBlt,hdc, mouseX,mouseY,8,8,hdcMem,\
@@ -149,6 +162,7 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 			; invoke	CreateSolidBrush, cColor
 			; invoke	FillRect, hdc, OFFSET rectangle2, eax
 
+		
         invoke  EndPaint,hWnd,addr ps   ;120 釋放視窗設備內容
 
 	.ELSEIF uMsg == WM_MOUSEMOVE
@@ -160,11 +174,30 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		mov mouseY, eax
 
 		invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
-
+	.ELSEIF uMsg == WM_LBUTTONUP
+		mWrite "CLICK LEFT" 
+	.ELSEIF uMsg == WM_RBUTTONUP
+	.ELSEIF uMsg == WM_COMMAND
+		mov eax, wParam
+		; mShow eax
+		.IF ax == 101 ; Start Button ID defined in StartMenu.asm
+			mWrite "Start Game"
+		.ELSEIF ax == 100 ; Exit 
+			invoke PostQuitMessage,NULL
+			mov eax, 0
+			ret
+		.ENDIF
+	.ELSEIF uMsg == WM_SETCURSOR
+		mov eax, lParam
+		.IF ax == HTCLIENT
+			invoke SetCursor, hCursor
+			ret
+		.ENDIF
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
 		ret
+
 	.ENDIF
 msg_process:
     invoke  DefWindowProc, hWnd, uMsg, wParam, lParam

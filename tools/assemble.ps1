@@ -1,7 +1,7 @@
 # CONFIG ZONE #
 $INCLUDE_PATHS_ARRAY = @(
 	"Irvine",
-	"C:\UASM\include"
+	"C:\uasm\include"
 )
 
 # WORKING ZONE #
