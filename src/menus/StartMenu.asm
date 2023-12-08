@@ -1,22 +1,29 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-INCLUDE WinUser.inc
+INCLUDE winuser.inc
 INCLUDE Macros.inc
 
 
 .data
-WelcomeMsg      BYTE    "Welcome!", 0
-StartMsg        BYTE    "Start", 0
-WelcomeRect     RECT    <540,100,740,200>    
-StartRect       RECT    <540,150,740,250>    
+
+WelcomeMsg          BYTE    "Welcome!", 0
+StartMsg            BYTE    "Start", 0
+WelcomeRect         RECT    <540,100,740,200>    
+StartRect           RECT    <540,150,740,250>
+BtnClass            BYTE    "button", 0
+IDC_BUTTON_START    HMENU   132
 .code
-StartMenu_init PROC hdc: HDC
 
-    invoke DrawText, hdc, OFFSET WelcomeMsg, -1 , OFFSET WelcomeRect,DT_CENTER or DT_VCENTER or DT_SINGLELINE
+StartMenu_init PROC  hWnd: HWND, hdc: HDC
+
     
-
-    invoke DrawText, hdc, OFFSET StartMsg, -1 , OFFSET StartRect,DT_CENTER or DT_VCENTER or DT_SINGLELINE
+    invoke CreateWindowEx, NULL, OFFSET BtnClass,  OFFSET StartMsg, WS_VISIBLE or WS_CHILD or BS_DEFPUSHBUTTON , 540, 150, 200, 100, hWnd, IDC_BUTTON_START, hWnd, NULL
+    
     ret
 StartMenu_init ENDP
+
+; StartMenu_click PROC lParam: lParam
+
+; StartMenu_click ENDP
 
 END

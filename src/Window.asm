@@ -4,7 +4,7 @@ INCLUDE WinUser.inc
 INCLUDE Macros.inc
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM 
-StartMenu_init PROTO, :HDC
+StartMenu_init PROTO, :HWND, :HDC
 .data
 
 ClassName		BYTE		"SimpleWinClass", 0		; don't change this
@@ -100,12 +100,14 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; mShow eax
 
 		invoke ShowCursor, FALSE ; Hide cursor
-
+		
+		invoke StartMenu_init, hWnd, hdc
+		
+		
 		invoke  LoadBitmap, hInstance, offset BMPName             ;078 載入位元圖
 		mShow	eax
         mov     hBitmap,eax
         invoke  GetObject,hBitmap,sizeof bitmapABC,addr bitmapABC     ;080 位元圖屬性
-
 
         ; mov     ecx, bitmapABC.bmWidth      ;081 位元圖寬度存於 ncx
 		; mShow ecx
@@ -124,9 +126,10 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 ; 		mShow bitmap.bmBits
 ; b_label:
 		; mWriteLn "Finish"
-		
+				
 	.ELSEIF uMsg == WM_PAINT
-	
+
+
 		invoke  BeginPaint,hWnd,addr ps ;108 取得視窗的設備內容
         mov     hdc, eax
         invoke  CreateCompatibleDC,eax  ;110 建立相同的設備內容作為來源
@@ -135,8 +138,8 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; mShow mouseX
 		; mShow mouseY
 		
-		invoke StartMenu_init, hdc
-
+		
+		
         mov     eax, 0
         mov     ecx, 0
         invoke  BitBlt,hdc, mouseX,mouseY,8,8,hdcMem,\
@@ -167,7 +170,15 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 
 		invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
 	.ELSEIF uMsg == WM_LBUTTONUP
-		mWrite "CLICK"
+		mWrite "CLICK LEFT" 
+	
+	.ELSEIF uMsg == WM_COMMAND
+		mov eax, wParam
+		; mShow eax
+		.IF ax == 132 ; Button ID defined in StartMenu.asm
+			mWrite "Start Game"
+		.ENDIF
+
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
