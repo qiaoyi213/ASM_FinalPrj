@@ -162,6 +162,9 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		; mShow eax
 		.IF ax == 101 ; Start Button ID defined in StartMenu.asm
 			mWrite "Start Game"
+			
+			; invoke Game_init
+
 		.ELSEIF ax == 100 ; Exit 
 			invoke PostQuitMessage,NULL
 			mov eax, 0
