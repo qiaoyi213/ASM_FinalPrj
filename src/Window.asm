@@ -52,11 +52,6 @@ Window_init PROC
 
 	mov     windowClass.hbrBackground, COLOR_WINDOW+1
 
-	; Since no icon, disable first
-	; invoke  LoadIcon,NULL,IDI_APPLICATION   ;取得圖示代碼
-	; mov     wc.hIcon,eax                    ;存入圖示代碼
-	; mov     wc.hIconSm,eax                  ;存入小圖示代碼
-
 	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
 
 	mov hCursor, eax
@@ -114,23 +109,7 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
         mov     hBitmap,eax
         invoke  GetObject,hBitmap,sizeof bitmapABC,addr bitmapABC     ;080 位元圖屬性
 
-        ; mov     ecx, bitmapABC.bmWidth      ;081 位元圖寬度存於 ncx
-		; mShow ecx
-        ; mov     ncx,ecx
-        ; mov     ecx, bitmapABC.bmHeight     ;083 位元圖高度存於 ncy
-		; mShow ecx
-        ; mov     ncy,ecx
-		; jnz a_label
-		; mWriteLn "fail"
-; 		jmp b_label
-; a_label:
-; 		mShow bitmap.bmType
-; 		mShow bitmap.bmWidth
-; 		mShow bitmap.bmHeight
-; 		mShow bitmap.bmBitsPixel
-; 		mShow bitmap.bmBits
-; b_label:
-		; mWriteLn "Finish"
+
 				
 	.ELSEIF uMsg == WM_PAINT
 
@@ -173,10 +152,11 @@ Window_Process PROC, hWnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		shr eax, 10h
 		mov mouseY, eax
 
-		invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
+		; invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
 	.ELSEIF uMsg == WM_LBUTTONUP
 		mWrite "CLICK LEFT" 
 	.ELSEIF uMsg == WM_RBUTTONUP
+
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		; mShow eax
