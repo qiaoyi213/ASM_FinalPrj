@@ -6,6 +6,7 @@ INCLUDE ../Reference.inc
 
 extern main_getHInstance: PROC
 extern GetIndexedStr: PROTO, :DWORD
+extern Game_create: PROTO, :HWND
 
 .data
 
@@ -81,7 +82,17 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 			WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON,\
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_EXIT_EXECCODE, hInstance, NULL
+	.ELSEIF uMsg == WM_COMMAND
+		mov eax, wParam
+		.IF eax == BTN_START_EXECCODE
+		
+			invoke Game_create, hwnd
+			mWrite "START GAME"
+		.ELSEIF eax == BTN_EXIT_EXECCODE
+			mWrite "EXIT GAME"
+		.ENDIF
 	.ENDIF
+
     invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
 
 	ret

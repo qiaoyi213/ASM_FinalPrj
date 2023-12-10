@@ -10,7 +10,7 @@ extern Window_create: PROC
 extern Window_handleMsg: PROC
 
 extern StartMenu_init: PROC
-
+extern Game_init: PROC
 .data
 	hInstance	HINSTANCE	?
 	
@@ -24,6 +24,7 @@ main PROC
 	call Boot
 	call Window_init
 	call StartMenu_init
+	call Game_init
 
 	call Window_create
 	call Window_handleMsg
