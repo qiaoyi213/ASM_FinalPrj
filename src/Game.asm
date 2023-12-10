@@ -33,10 +33,5 @@ Game_check_status PROC lParam: lParam
     ; If not, record and update the status
     ; If the mob is attack player, then update the status
 
-    ; Check the number of mob
-    ; if Pass this level
-    ; Invoke pass the level and go to next level
-    ; Record the score of player
-    
-Game_check_status ENDP
+
 END
