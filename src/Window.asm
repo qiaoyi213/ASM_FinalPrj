@@ -15,10 +15,14 @@ Window_MouseMove PROTO, :LPARAM
 .data
 hInstance			HINSTANCE	?
 
+
 windowClassName		BYTE		"GameWindow", 0
 windowClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET windowClassName,?>
 
 windowTitle			BYTE		"The Game", 0
+ 
+CURName			DB			"cursorFile", 0
+
 
 
 mouseX				DWORD		?
@@ -36,13 +40,13 @@ Window_init PROC
 	mov     windowClass.lpfnWndProc, OFFSET Window_Process
 	mov     windowClass.hbrBackground, COLOR_WINDOW+1
 
-	; Since no icon, disable first
-	; invoke  LoadIcon,NULL,IDI_APPLICATION   ;取得圖示代碼
-	; mov     wc.hIcon,eax                    ;存入圖示代碼
-	; mov     wc.hIconSm,eax                  ;存入小圖示代碼
+	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
 
-	invoke  LoadCursor, NULL, IDC_ARROW
-	mov     windowClass.hCursor, eax
+
+	mov hCursor, eax
+	mShow hCursor
+	invoke 	SetCursor, hCursor
+
 
 	invoke  RegisterClassEx, OFFSET windowClass
 	ret
@@ -85,16 +89,43 @@ Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		invoke Resource_loadAll, hInstance
 		invoke StartMenu_create, hwnd
 
+
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		invoke Window_MouseMove, lParam
 
 	.ELSEIF uMsg == WM_PAINT
 		invoke Window_Paint, hwnd
 
+		; invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
+	.ELSEIF uMsg == WM_LBUTTONUP
+		mWrite "CLICK LEFT" 
+	.ELSEIF uMsg == WM_RBUTTONUP
+
+
+	.ELSEIF uMsg == WM_COMMAND
+		mov eax, wParam
+		; mShow eax
+		.IF ax == 101 ; Start Button ID defined in StartMenu.asm
+			mWrite "Start Game"
+			
+			; invoke Game_init
+
+		.ELSEIF ax == 100 ; Exit 
+			invoke PostQuitMessage,NULL
+			mov eax, 0
+			ret
+		.ENDIF
+	.ELSEIF uMsg == WM_SETCURSOR
+		mov eax, lParam
+		.IF ax == HTCLIENT
+			invoke SetCursor, hCursor
+			ret
+		.ENDIF
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
 		ret
+
 	.ENDIF
 msg_process:
     invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
