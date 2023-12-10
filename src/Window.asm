@@ -1,43 +1,39 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-INCLUDE WinUser.inc
 INCLUDE Macros.inc
 
 INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern Resource_loadAll: PROTO, :HINSTANCE
+extern StartMenu_create: PROTO, :HWND
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 Window_Paint PROTO, :HWND
+Window_MouseMove PROTO, :LPARAM
 
 .data
-hInstance	HINSTANCE	?
+hInstance			HINSTANCE	?
 
-wndClassName	BYTE		"SimpleWinClass", 0		; don't change this
-wndTitle		BYTE		"The Game", 0
+windowClassName		BYTE		"GameWindow", 0
+windowClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET windowClassName,?>
 
-windowClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET wndClassName,?>
+windowTitle			BYTE		"The Game", 0
 
-BMPName			DB			"SlimeImg", 0
-hBitmap			DWORD		?
+
+mouseX				DWORD		?
+mouseY				DWORD		?
 
 .code
 
 Window_init PROC
-	LOCAL	hwnd:	HWND
-	LOCAL	msg:	MSG
-
 	; fetch the main instance
 	call	main_getHInstance
 	mov		hInstance, eax
 
-make_class:
 	mov     windowClass.hInstance, eax
-
 	mov     windowClass.style, NULL
 	mov     windowClass.lpfnWndProc, OFFSET Window_Process
-
 	mov     windowClass.hbrBackground, COLOR_WINDOW+1
 
 	; Since no icon, disable first
@@ -49,17 +45,28 @@ make_class:
 	mov     windowClass.hCursor, eax
 
 	invoke  RegisterClassEx, OFFSET windowClass
+	ret
+Window_init ENDP
 
-create_window:
-	invoke  CreateWindowEx, NULL, OFFSET wndClassName, OFFSET wndTitle,\
-			WS_OVERLAPPEDWINDOW,\
+Window_create PROC
+	LOCAL	hwnd:	HWND
+
+	invoke  CreateWindowEx, NULL, OFFSET windowClassName, OFFSET windowTitle,\
+			WS_OVERLAPPEDWINDOW xor WS_THICKFRAME,\
 			CW_USEDEFAULT, CW_USEDEFAULT, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
 			NULL, NULL, hInstance, NULL
 	mov     hwnd, eax
 
 	invoke  ShowWindow, hwnd, SW_SHOWDEFAULT
 	invoke  UpdateWindow, hwnd
- 
+
+	mov eax, hwnd
+	ret
+Window_create ENDP
+
+Window_handleMsg PROC
+	LOCAL msg: MSG
+	
 message_handling:
 	invoke  GetMessage, ADDR msg, NULL, 0, 0
 	cmp     eax, 0
@@ -70,16 +77,16 @@ message_handling:
 
 message_quit:
 	mov     eax, msg.wParam
-	invoke  ExitProcess, eax
 	ret
-Window_init ENDP
+Window_handleMsg ENDP
 
 Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.IF uMsg == WM_CREATE
 		invoke Resource_loadAll, hInstance
+		invoke StartMenu_create, hwnd
 
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		invoke Window_MouseMove
+		invoke Window_MouseMove, lParam
 
 	.ELSEIF uMsg == WM_PAINT
 		invoke Window_Paint, hwnd
@@ -117,7 +124,15 @@ Window_Paint PROC, hwnd: HWND
 	ret
 Window_Paint ENDP
 
-Window_MouseMove PROC
+Window_MouseMove PROC, lParam: LPARAM
+	mov eax, lParam
+	and eax, 0ffffh
+	mov mouseX, eax
+	mov eax, lParam
+	shr eax, 10h
+	mov mouseY, eax
+
+	ret
 Window_MouseMove ENDP
 
 END

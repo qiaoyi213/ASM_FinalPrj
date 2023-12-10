@@ -3,20 +3,32 @@ INCLUDE WINDOWS.inc
 INCLUDE WinUser.inc
 INCLUDE Macros.inc
 
-Mob STRUCT
-	namePTR DWORD ?
-	health	DWORD 0
-Mob ENDS
+INCLUDE Reference.inc
+
+extern Window_init: PROC
+extern Window_create: PROC
+extern Window_handleMsg: PROC
+
+extern StartMenu_init: PROC
 
 .data
-	hInstance	HINSTANCE ?
+	hInstance	HINSTANCE	?
+	
+	; States
+	; 0 : start menu
+	; 1 : in game
+	State		DWORD		0
 .code
-	extern Window_init: PROC
 
 main PROC
 	call Boot
 	call Window_init
+	call StartMenu_init
 
+	call Window_create
+	call Window_handleMsg
+
+	invoke  ExitProcess, eax
 	ret
 main ENDP
 
@@ -31,5 +43,10 @@ main_getHInstance PROC
 	mov eax, hInstance
 	ret
 main_getHInstance ENDP
+
+main_getState PROC
+	mov eax, State
+	ret
+main_getState ENDP
 
 END main

@@ -1,3 +1,9 @@
+$GAME_NAME$			= 0
+
+$BUTTON$			= 1
+
+; ----------
+
 _WINDOW_WIDTH		= 1280
 _WINDOW_HEIGHT		= 720
 
