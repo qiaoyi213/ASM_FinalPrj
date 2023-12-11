@@ -26,7 +26,7 @@ game_hwnd			HWND		?
 
 .code
 Game_paint PROTO, :HWND
-DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,  :DWORD
+DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,  :DWORD, :DWORD
 DrawMobs PROTO, :HDC, :HDC
 Detect_Collision PROTO, :LPARAM
 
@@ -71,14 +71,6 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 
 		invoke Level_Load, 1, ADDR Mobs
 
-		; mov eax, OFFSET Mobs
-		
-        ; invoke Mob_init,eax, _MOB_SLIME_ID, 500, 50, 100
-        ; add eax, TYPE Mob
-
-        ; invoke Mob_init,eax, _MOB_SLIME_ID, 1000, 50, 100
-		
-		; mShow Mobs[TYPE Mob].X
         mWriteLn "Create Success"
 
 	.ELSEIF uMsg == WM_PAINT
@@ -128,10 +120,12 @@ Detect_Collision PROC USES ecx, lParam:LPARAM
 	mov ecx, 5
 	mov edi, 0
 detect_collision_loop:
+
 	invoke Collision_Check, lParam, Mobs[edi].X, Mobs[edi].Y
 	
     .IF eax == 1
 		mWrite "ATTACK"
+		mov Mobs[edi].Hit, 1
     .ENDIF
 
 	add edi, TYPE Mob
@@ -145,16 +139,23 @@ DrawMobs PROC USES edi ecx eax, hdc, hdcMem
 	mov edi, 0
 
 draw_mobs_loop:
-	; mShow ecx
-	invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, Mobs[edi]._type
-	add edi, TYPE Mob
 	
-
+	.IF Mobs[edi].Hit == 0
+		invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, Mobs[edi]._type, NULL
+	.ELSE
+		mWrite "A"
+		; invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, _MOB_SLIME_HIT_ID, Mobs[edi].Hit
+		inc Mobs[edi].Hit
+		.IF Mobs[edi].Hit == 6
+			mov Mobs[edi].Hit, 0
+		.ENDIF
+	.ENDIF
+	add edi, TYPE Mob
 	loop draw_mobs_loop
 	ret 
 DrawMobs ENDP
 
-DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, MOB_ID: DWORD
+DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, MOB_ID: DWORD, Hit: DWORD
 	LOCAL hBitmap: DWORD 
 	LOCAL imgX: DWORD
 
@@ -163,14 +164,17 @@ DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, MOB_ID: DWORD
 	
 	; mWriteLn "DRAW MOB"
 	invoke  SelectObject, hdcMem, hBitmap     ;112 選定來源設備內容的位元圖
-	
 	mov eax, 44
-	mul t
+	.IF MOB_ID == _MOB_SLIME_HIT_ID
+		sub Hit, 1
+		mShow Hit
+		mul Hit
+	.ELSE 
+		mul t
+	.ENDIF
 	mov imgX, eax
-
 	mov     eax, 0
 	mov     ecx, imgX
-
 	invoke  BitBlt,hdc,X,Y,44,30,hdcMem,\
 			ecx,eax,SRCCOPY         ;118 傳送位元圖到視窗的設備內
 	
