@@ -47,7 +47,7 @@ StartMenu_init ENDP
 StartMenu_create PROC, main_hwnd: HWND
 	LOCAL	sm_hwnd: HWND
 
-	mWrite "CREATE_MENU"
+	
 	invoke  CreateWindowEx, NULL, OFFSET StartMenuClassName, OFFSET StartMenuTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
@@ -65,7 +65,7 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	; LOCAL buttonStringPtr: BYTE PTR
 
 	.IF uMsg == WM_CREATE
-		mWrite "CREATE MENU"
+		mWriteLn "CREATE MENU"
 		invoke GetIndexedStr, $BUTTON$
 		mov ebx, _WINDOW_WIDTH
 		sub ebx, BTN_WIDTH

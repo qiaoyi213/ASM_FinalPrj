@@ -5,18 +5,8 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern Resource_getMobImgHandle: PROTO, :DWORD
-
-Mob STRUCT
-	_type	 		DWORD		?
-	X				DWORD		?
-	Y				DWORD		?
-	HP				DWORD		?
-	MoveBias		DWORD		?
-	AttackClock		DWORD		?
-	AnimationClock	DWORD		?
-
-Mob ENDS
-
+extern Level_Load: PROTO, level: DWORD, Mobs: PTR Mob
+extern Mob_init: PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
 .data
 Level	            BYTE		0
 Life				WORD		5
@@ -24,7 +14,7 @@ Life				WORD		5
 Score				BYTE		"0000", 0
 ScorePos			RECT		<1000, 20, 1280, 100>
 
-; Mobs				Mob			_MOB_LIST_MAX_SIZE DUP(<>)
+Mobs				Mob			5 DUP(<>)
 TimerID				EQU			74
 t					DWORD		0
 hInstance			HINSTANCE	?
@@ -35,7 +25,8 @@ game_hwnd			HWND		?
 
 .code
 Game_paint PROTO, :HWND
-DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,:DWORD,  :DWORD
+DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,  :DWORD
+DrawMobs PROTO, :HDC, :HDC
 
 Game_init PROC
     call	main_getHInstance
@@ -71,18 +62,29 @@ Game_create PROC, main_hwnd: HWND
     ret
 Game_create ENDP
 
-Game_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     
     .IF uMsg == WM_CREATE
 		invoke SetTimer, hwnd, TimerID, 100, NULL
-		; invoke Load_Level, OFFSET Mobs
-        mWrite "Create Success"
+
+		invoke Level_Load, 1, ADDR Mobs
+
+		; mov eax, OFFSET Mobs
+		
+        ; invoke Mob_init,eax, _MOB_SLIME_ID, 500, 50, 100
+        ; add eax, TYPE Mob
+
+        ; invoke Mob_init,eax, _MOB_SLIME_ID, 1000, 50, 100
+		
+		; mShow Mobs[TYPE Mob].X
+        mWriteLn "Create Success"
 
 	.ELSEIF uMsg == WM_PAINT
 		invoke Game_paint, hwnd
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		; Detect mouse and attack 
+		; Detect mouse and attack
+		
 	.ELSEIF uMsg == WM_TIMER
 		.IF t == 9
 			mov t, 0
@@ -109,8 +111,7 @@ Game_paint PROC, hwnd: HWND
 
 	invoke DrawText, hdc, OFFSET Score, -1, OFFSET ScorePos, DT_CENTER ; Draw score
 
-	invoke DrawMob, hdc, hdcMem, 500, 400, 0, _MOB_SLIME_ID
-	invoke DrawMob, hdc, hdcMem, 800, 400, 0, _MOB_SLIME_ID
+	invoke DrawMobs, hdc, hdcMem
 
 
 	invoke  DeleteDC, hdcMem         ;119 釋放來源設備內容
@@ -118,12 +119,29 @@ Game_paint PROC, hwnd: HWND
 	ret
 Game_paint ENDP
 
-DrawMob PROC,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, Animation:DWORD, MOB_ID: DWORD
+DrawMobs PROC USES edi ecx eax, hdc, hdcMem
+
+	mov ecx, 5
+	mov edi, 0
+
+draw_mobs_loop:
+	mShow ecx
+	invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, Mobs[edi]._type
+	add edi, TYPE Mob
+	
+
+	loop draw_mobs_loop
+	ret 
+DrawMobs ENDP
+
+DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, MOB_ID: DWORD
 	LOCAL hBitmap: DWORD 
 	LOCAL imgX: DWORD
+
  	invoke Resource_getMobImgHandle, MOB_ID ; eax is the handler
 	mov hBitmap, eax
 	
+	; mWriteLn "DRAW MOB"
 	invoke  SelectObject, hdcMem, hBitmap     ;112 選定來源設備內容的位元圖
 	
 	mov eax, 44
