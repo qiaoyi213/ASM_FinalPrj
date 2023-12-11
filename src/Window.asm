@@ -40,7 +40,7 @@ Window_init PROC
 	mov     windowClass.lpfnWndProc, OFFSET Window_Process
 	mov     windowClass.hbrBackground, COLOR_WINDOW+1
 
-	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
+	; invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
 
 
 	mov hCursor, eax

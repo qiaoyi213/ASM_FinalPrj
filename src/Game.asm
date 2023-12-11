@@ -7,6 +7,7 @@ extern main_getHInstance: PROC
 extern Resource_getMobImgHandle: PROTO, :DWORD
 extern Level_Load: PROTO, level: DWORD, Mobs: PTR Mob
 extern Mob_init: PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
+extern Collision_Check: PROTO, :LPARAM, :DWORD, :DWORD
 .data
 Level	            BYTE		0
 Life				WORD		5
@@ -27,6 +28,7 @@ game_hwnd			HWND		?
 Game_paint PROTO, :HWND
 DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,  :DWORD
 DrawMobs PROTO, :HDC, :HDC
+Detect_Collision PROTO, :LPARAM
 
 Game_init PROC
     call	main_getHInstance
@@ -84,7 +86,8 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		; Detect mouse and attack
-		
+		invoke Detect_Collision, lParam
+		; mWriteLn "MOVE"
 	.ELSEIF uMsg == WM_TIMER
 		.IF t == 9
 			mov t, 0
@@ -119,13 +122,30 @@ Game_paint PROC, hwnd: HWND
 	ret
 Game_paint ENDP
 
+
+Detect_Collision PROC USES ecx, lParam:LPARAM
+
+	mov ecx, 5
+	mov edi, 0
+detect_collision_loop:
+	invoke Collision_Check, lParam, Mobs[edi].X, Mobs[edi].Y
+	
+    .IF eax == 1
+		mWrite "ATTACK"
+    .ENDIF
+
+	add edi, TYPE Mob
+	loop detect_collision_loop
+	ret
+Detect_Collision ENDP
+
 DrawMobs PROC USES edi ecx eax, hdc, hdcMem
 
 	mov ecx, 5
 	mov edi, 0
 
 draw_mobs_loop:
-	mShow ecx
+	; mShow ecx
 	invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, Mobs[edi]._type
 	add edi, TYPE Mob
 	
