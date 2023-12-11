@@ -24,6 +24,9 @@ main PROC
 	call Boot
 	call Window_init
  	call StartMenu_init
+	; mWrite "INIT MENU"
+
+	call Game_init
 	
 	call Window_create
 	call Window_handleMsg
@@ -48,5 +51,6 @@ main_getState PROC
 	mov eax, State
 	ret
 main_getState ENDP
+
 
 END main

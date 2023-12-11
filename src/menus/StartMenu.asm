@@ -1,12 +1,12 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-
 INCLUDE Macros.inc
 INCLUDE ../Reference.inc
 
 extern main_getHInstance: PROC
 extern GetIndexedStr: PROTO, :DWORD
 extern Game_create: PROTO, :HWND
+extern Game_Show: PROC
 
 .data
 
@@ -40,19 +40,21 @@ StartMenu_init PROC
 	mov     StartMenuClass.hCursor, eax
 
 	invoke  RegisterClassEx, OFFSET StartMenuClass
+
 	ret
 StartMenu_init ENDP
 
 StartMenu_create PROC, main_hwnd: HWND
 	LOCAL	sm_hwnd: HWND
 
+	mWrite "CREATE_MENU"
 	invoke  CreateWindowEx, NULL, OFFSET StartMenuClassName, OFFSET StartMenuTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
 			main_hwnd, NULL, hInstance, NULL
 	mov     sm_hwnd, eax
 
-	invoke  ShowWindow, sm_hwnd, SW_HIDE
+	invoke  ShowWindow, sm_hwnd, SW_SHOW
 	invoke  UpdateWindow, sm_hwnd
 
 	mov eax, sm_hwnd
@@ -87,6 +89,7 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		mov eax, wParam
 		.IF eax == BTN_START_EXECCODE
 			invoke ShowWindow, hwnd, SW_HIDE
+			call Game_Show
 			mWrite "START GAME"
 		.ELSEIF eax == BTN_EXIT_EXECCODE
 			mWrite "EXIT GAME"
