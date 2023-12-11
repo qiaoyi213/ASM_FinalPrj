@@ -20,20 +20,22 @@ Collision_Check PROC USES ebx, lParam:LPARAM, X:DWORD, Y:DWORD
     ; .IF Tmp_Mob.X <= mouseX  AND Tmp_Mob.X >= mouseX and Tmp_Mob.Y <= mouseY and Tmp_Mob.Y >= mouseY
 	; 	mWrite "ATTACK"
     ; .ENDIF
-    mShow mouseX
-    mShow mouseY
-    mov ebx, mouseX
-    add ebx, 30
-    .IF X <= ebx
-        mov ebx, mouseX
-        .IF X >= ebx
-            mov ebx, mouseY
-            add ebx, 44
-            .IF Y <= ebx
-                mov ebx, mouseY
-                .IF Y >= ebx
+    ; mShow mouseX
+    ; mShow mouseY
+    ; mShow X
+    ; mShow Y
+    mov ebx, X
+    add ebx, 44
+    .IF mouseX <= ebx
+        mov ebx, X
+        .IF mouseX >= ebx
+            mov ebx, Y
+            add ebx, 30
+            .IF mouseY <= ebx
+                sub ebx, Y
+                .IF mouseY >= ebx
                     mov eax, 1
-                    ; mWrite "ATTACK"
+                    mWrite "ATTACK"
                     ret
                 .ENDIF
             .ENDIF
