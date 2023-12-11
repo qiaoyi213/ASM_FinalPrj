@@ -29,9 +29,13 @@ main PROC
 	call Game_init
 	
 	call Window_create
+	
+	
 	call Window_handleMsg
 
+
 	invoke  ExitProcess, eax
+
 	ret
 main ENDP
 

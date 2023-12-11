@@ -11,7 +11,7 @@ Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
 
 bitmapBuffer	BITMAP	<>
 
-MobImgHandles	DWORD	_MOB_LIST_MAX_SIZE DUP (?)
+MobImgHandles	DWORD	_MOB_ID_SIZE DUP (?)
 
 __SlimeImg		BYTE 	"SlimeImg", 0
 __TrunkImg		BYTE 	"TrunkImg", 0
@@ -41,7 +41,7 @@ Resource_loadAll ENDP
 Resource_getMobImgHandle PROC USES edx, id: DWORD
 	mov edx, id
 	mov eax, MobImgHandles[edx]
-	mShow eax
+	; mShow eax
 
 	ret
 Resource_getMobImgHandle ENDP

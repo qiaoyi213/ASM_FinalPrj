@@ -81,6 +81,7 @@ message_handling:
 
 message_quit:
 	mov     eax, msg.wParam
+	
 	ret
 Window_handleMsg ENDP
 
