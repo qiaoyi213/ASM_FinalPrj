@@ -52,7 +52,7 @@ StartMenu_create PROC, main_hwnd: HWND
 			main_hwnd, NULL, hInstance, NULL
 	mov     sm_hwnd, eax
 
-	invoke  ShowWindow, sm_hwnd, SW_SHOW
+	invoke  ShowWindow, sm_hwnd, SW_HIDE
 	invoke  UpdateWindow, sm_hwnd
 
 	mov eax, sm_hwnd
@@ -63,6 +63,7 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	; LOCAL buttonStringPtr: BYTE PTR
 
 	.IF uMsg == WM_CREATE
+		mWrite "CREATE MENU"
 		invoke GetIndexedStr, $BUTTON$
 		mov ebx, _WINDOW_WIDTH
 		sub ebx, BTN_WIDTH
@@ -85,8 +86,7 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_START_EXECCODE
-		
-			invoke Game_create, hwnd
+			invoke ShowWindow, hwnd, SW_HIDE
 			mWrite "START GAME"
 		.ELSEIF eax == BTN_EXIT_EXECCODE
 			mWrite "EXIT GAME"

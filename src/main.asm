@@ -23,9 +23,8 @@ extern Game_init: PROC
 main PROC
 	call Boot
 	call Window_init
-	call StartMenu_init
-	call Game_init
-
+ 	call StartMenu_init
+	
 	call Window_create
 	call Window_handleMsg
 
