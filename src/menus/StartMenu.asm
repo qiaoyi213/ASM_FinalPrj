@@ -1,30 +1,105 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-INCLUDE winuser.inc
 INCLUDE Macros.inc
+INCLUDE ../Reference.inc
 
+extern main_getHInstance: PROC
+extern GetIndexedStr: PROTO, :DWORD
+extern Game_create: PROTO, :HWND
+extern Game_Show: PROC
 
 .data
 
-WelcomeMsg          BYTE    "Welcome!", 0
-StartMsg            BYTE    "Start", 0
-QuitMsg             BYTE    "Quit", 0
-WelcomeRect         RECT    <540,100,740,200>    
-StartRect           RECT    <540,150,740,250>
-BtnClass            BYTE    "button", 0
-IDC_BUTTON_START    HMENU   101
-IDC_BUTTON_EXIT     HMENU   100
+hInstance				HINSTANCE	?
+
+StartMenuClassName		BYTE		"Pane", 0
+StartMenuClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET StartMenuClassName,?>
+
+StartMenuTitle			BYTE		"Start Menu", 0
+
+BTN_WIDTH				DWORD		400
+BTN_HEIGHT				DWORD		60
+
+BTN_START_EXECCODE		HMENU		101
+BTN_START_TEXT			BYTE		"Start", 0
+
+BTN_EXIT_EXECCODE		HMENU		102
+BTN_EXIT_TEXT			BYTE		"Exit", 0
+
 .code
+StartMenu_init PROC
+	call	main_getHInstance
+	mov		hInstance, eax
 
-StartMenu_init PROC  hWnd: HWND, hdc: HDC
+	mov     StartMenuClass.hInstance, eax
+	mov     StartMenuClass.style, NULL
+	mov     StartMenuClass.lpfnWndProc, OFFSET StartMenu_Process
+	mov     StartMenuClass.hbrBackground, COLOR_WINDOW+1
 
-    invoke CreateWindowEx, NULL, OFFSET BtnClass,  OFFSET StartMsg, WS_VISIBLE or WS_CHILD or BS_DEFPUSHBUTTON , 540, 150, 200, 100, hWnd, IDC_BUTTON_START, hWnd, NULL
-    invoke CreateWindowEx, NULL, OFFSET BtnClass,  OFFSET QuitMsg, WS_VISIBLE or WS_CHILD or BS_DEFPUSHBUTTON , 540, 550, 200, 100, hWnd, IDC_BUTTON_EXIT, hWnd, NULL
-    ret
+	invoke  LoadCursor, NULL, IDC_ARROW
+	mov     StartMenuClass.hCursor, eax
+
+	invoke  RegisterClassEx, OFFSET StartMenuClass
+
+	ret
 StartMenu_init ENDP
 
-; StartMenu_click PROC lParam: lParam
+StartMenu_create PROC, main_hwnd: HWND
+	LOCAL	sm_hwnd: HWND
 
-; StartMenu_click ENDP
+	
+	invoke  CreateWindowEx, NULL, OFFSET StartMenuClassName, OFFSET StartMenuTitle,\
+			WS_CHILD or WS_VISIBLE,\
+			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
+			main_hwnd, NULL, hInstance, NULL
+	mov     sm_hwnd, eax
+
+	invoke  ShowWindow, sm_hwnd, SW_SHOW
+	invoke  UpdateWindow, sm_hwnd
+
+	mov eax, sm_hwnd
+	ret
+StartMenu_create ENDP
+
+StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+	; LOCAL buttonStringPtr: BYTE PTR
+
+	.IF uMsg == WM_CREATE
+		mWriteLn "CREATE MENU"
+		invoke GetIndexedStr, $BUTTON$
+		mov ebx, _WINDOW_WIDTH
+		sub ebx, BTN_WIDTH
+		shr ebx, 1
+
+		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_START_TEXT,\
+			WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON,\
+			ebx, 200, BTN_WIDTH, BTN_HEIGHT,\
+			hwnd, BTN_START_EXECCODE, hInstance, NULL
+
+		invoke GetIndexedStr, $BUTTON$
+		mov ebx, _WINDOW_WIDTH
+		sub ebx, BTN_WIDTH
+		shr ebx, 1
+
+		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_EXIT_TEXT,\
+			WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON,\
+			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
+			hwnd, BTN_EXIT_EXECCODE, hInstance, NULL
+	.ELSEIF uMsg == WM_COMMAND
+		mov eax, wParam
+		.IF eax == BTN_START_EXECCODE
+			invoke ShowWindow, hwnd, SW_HIDE
+			call Game_Show
+			mWrite "START GAME"
+		.ELSEIF eax == BTN_EXIT_EXECCODE
+			mWrite "EXIT GAME"
+		.ENDIF
+	.ENDIF
+
+    invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
+
+	ret
+StartMenu_Process ENDP
+
 
 END

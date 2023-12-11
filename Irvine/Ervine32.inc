@@ -1,7 +1,7 @@
 ; Include file for Irvine32.lib             (Irvine32.inc)
 
-.386
-.MODEL  FLAT,STDCALL
+.686P
+.MODEL FLAT,STDCALL
 OPTION CASEMAP:NONE		; optional: make identifiers case-sensitive
 
 INCLUDE VirtualKeys.inc
