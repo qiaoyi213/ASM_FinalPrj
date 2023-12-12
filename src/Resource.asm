@@ -11,33 +11,43 @@ Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
 
 bitmapBuffer	BITMAP	<>
 
-MobImgHandles	DWORD	_MOB_LIST_MAX_SIZE DUP (?)
+MobImgHandles	DWORD	_MOB_ID_SIZE DUP (?)
 
 __SlimeImg		BYTE 	"SlimeImg", 0
+__SlimeHitImg	BYTE	"SlimeHitImg", 0
 __TrunkImg		BYTE 	"TrunkImg", 0
 __MushroomImg	BYTE 	"MushroomImg", 0
 
 .code
 
-Resource_load PROC, hInstance: HINSTANCE, hPtr: PTR DWORD, resName: PTR BYTE
+Resource_load PROC USES esi, hInstance: HINSTANCE, hPtr: PTR DWORD, resName: PTR BYTE
+	
+	mov     esi, hPtr
 	invoke  LoadBitmap, hInstance, resName
-	mov     (DWORD PTR [hPtr]), eax
-	invoke  GetObject, (DWORD PTR [hPtr]), SIZEOF bitmapBuffer, OFFSET bitmapBuffer
+	
+	mov [esi], eax
+	mShow eax
+	invoke  GetObject, [esi], SIZEOF bitmapBuffer, OFFSET bitmapBuffer
+	
 	ret
 Resource_load ENDP
 
 Resource_loadAll PROC, hInstance: HINSTANCE
 	; load mob images
-	invoke Resource_load, hInstance, MobImgHandles[_MOB_SLIME_ID], OFFSET __SlimeImg
+	invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_ID], OFFSET __SlimeImg
+	
 
+
+	; invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_HIT_ID], OFFSET __SlimeHitImg
+	; mShow MobImgHandles[1]
 	ret
 Resource_loadAll ENDP
 
-Resource_getImgHandle PROC USES edx, id: DWORD
+Resource_getMobImgHandle PROC USES edx, id: DWORD
 	mov edx, id
 	mov eax, MobImgHandles[edx]
-	ret
-Resource_getImgHandle ENDP
 
+	ret
+Resource_getMobImgHandle ENDP
 
 END

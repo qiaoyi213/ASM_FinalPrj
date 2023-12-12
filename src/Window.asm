@@ -7,11 +7,13 @@ INCLUDE Reference.inc
 extern main_getHInstance: PROC
 extern Resource_loadAll: PROTO, :HINSTANCE
 extern StartMenu_create: PROTO, :HWND
+extern Game_create: PROTO, :HWND
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 Window_Paint PROTO, :HWND
 Window_MouseMove PROTO, :LPARAM
 
+extern Game_create: PROTO, :HWND
 .data
 hInstance			HINSTANCE	?
 
@@ -21,10 +23,8 @@ windowClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET windowClassName,?>
 
 windowTitle			BYTE		"The Game", 0
  
-CURName			DB			"cursorFile", 0
-
-
-
+CURName				DB			"cursorFile", 0
+hCursor				HCURSOR		?
 mouseX				DWORD		?
 mouseY				DWORD		?
 
@@ -40,7 +40,7 @@ Window_init PROC
 	mov     windowClass.lpfnWndProc, OFFSET Window_Process
 	mov     windowClass.hbrBackground, COLOR_WINDOW+1
 
-	invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
+	; invoke  LoadImage, hInstance, OFFSET CURName, IMAGE_CURSOR, 60,60, LR_DEFAULTCOLOR  ; 讀取游標圖示
 
 
 	mov hCursor, eax
@@ -81,14 +81,16 @@ message_handling:
 
 message_quit:
 	mov     eax, msg.wParam
+	
 	ret
 Window_handleMsg ENDP
 
 Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.IF uMsg == WM_CREATE
 		invoke Resource_loadAll, hInstance
+		
+		invoke Game_create, hwnd
 		invoke StartMenu_create, hwnd
-
 
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		invoke Window_MouseMove, lParam
@@ -96,25 +98,6 @@ Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.ELSEIF uMsg == WM_PAINT
 		invoke Window_Paint, hwnd
 
-		; invoke InvalidateRect, hWnd, NULL, TRUE ; 產生 WM_PAINT 訊息並清空畫面 重新繪製
-	.ELSEIF uMsg == WM_LBUTTONUP
-		mWrite "CLICK LEFT" 
-	.ELSEIF uMsg == WM_RBUTTONUP
-
-
-	.ELSEIF uMsg == WM_COMMAND
-		mov eax, wParam
-		; mShow eax
-		.IF ax == 101 ; Start Button ID defined in StartMenu.asm
-			mWrite "Start Game"
-			
-			; invoke Game_init
-
-		.ELSEIF ax == 100 ; Exit 
-			invoke PostQuitMessage,NULL
-			mov eax, 0
-			ret
-		.ENDIF
 	.ELSEIF uMsg == WM_SETCURSOR
 		mov eax, lParam
 		.IF ax == HTCLIENT

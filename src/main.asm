@@ -10,7 +10,7 @@ extern Window_create: PROC
 extern Window_handleMsg: PROC
 
 extern StartMenu_init: PROC
-
+extern Game_init: PROC
 .data
 	hInstance	HINSTANCE	?
 	
@@ -23,12 +23,19 @@ extern StartMenu_init: PROC
 main PROC
 	call Boot
 	call Window_init
-	call StartMenu_init
+ 	call StartMenu_init
+	; mWrite "INIT MENU"
 
+	call Game_init
+	
 	call Window_create
+	
+	
 	call Window_handleMsg
 
+
 	invoke  ExitProcess, eax
+
 	ret
 main ENDP
 
@@ -48,5 +55,6 @@ main_getState PROC
 	mov eax, State
 	ret
 main_getState ENDP
+
 
 END main
