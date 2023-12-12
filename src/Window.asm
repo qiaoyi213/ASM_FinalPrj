@@ -13,7 +13,6 @@ Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 Window_Paint PROTO, :HWND
 Window_MouseMove PROTO, :LPARAM
 
-extern Game_create: PROTO, :HWND
 .data
 hInstance			HINSTANCE	?
 
