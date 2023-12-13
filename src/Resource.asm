@@ -11,51 +11,43 @@ Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
 
 bitmapBuffer	BITMAP	<>
 
-BGImgHandle		DWORD	?
+BGImgBrush		HBRUSH	?
 __BGImg			BYTE	"BGImg"
 
-MobImgHandles	DWORD	_MOB_ID_SIZE DUP (?)
+MobImgBrush		HBRUSH	_MOB_ID_SIZE DUP (?)
 
 __SlimeImg		BYTE 	"SlimeImg", 0
 __SlimeHitImg	BYTE	"SlimeHitImg", 0
 __TrunkImg		BYTE 	"TrunkImg", 0
 __MushroomImg	BYTE 	"MushroomImg", 0
 
+SlimeBrush		HBRUSH	?
+
 .code
 
-Resource_load PROC USES esi, hInstance: HINSTANCE, hPtr: PTR DWORD, resName: PTR BYTE
-	
-	mov     esi, hPtr
+Resource_load PROC USES esi eax, hInstance: HINSTANCE, hBrushPtr: PTR DWORD, resName: PTR BYTE
+	mov 	esi, hBrushPtr
 	invoke  LoadBitmap, hInstance, resName
-	
-	mov [esi], eax
-	mShow eax
-	invoke  GetObject, [esi], SIZEOF bitmapBuffer, OFFSET bitmapBuffer
+	invoke  CreatePatternBrush, eax
+	mov		[esi], eax
 	
 	ret
 Resource_load ENDP
 
 Resource_loadAll PROC, hInstance: HINSTANCE
 	; load background
-	invoke Resource_load, hInstance, OFFSET BGImgHandle, OFFSET __BGImg
-
-	; load mob images
-	invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_ID], OFFSET __SlimeImg
-
-
-	; invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_HIT_ID], OFFSET __SlimeHitImg
-	; mShow MobImgHandles[1]
+	invoke Resource_load, hInstance, OFFSET BGImgBrush, OFFSET __BGImg
 	ret
 Resource_loadAll ENDP
 
-Resource_getBGImgHandle PROC
-	mov eax, BGImgHandle
+Resource_getBGImgBrush PROC
+	mov eax, BGImgBrush
 	ret
-Resource_getBGImgHandle ENDP
+Resource_getBGImgBrush ENDP
 
 Resource_getMobImgHandle PROC USES edx, id: DWORD
 	mov edx, id
-	mov eax, MobImgHandles[edx]
+	mov eax, MobImgBrush[edx]
 
 	ret
 Resource_getMobImgHandle ENDP

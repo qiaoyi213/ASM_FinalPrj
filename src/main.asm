@@ -24,13 +24,9 @@ main PROC
 	call Boot
 	call Window_init
  	call StartMenu_init
-	; mWrite "INIT MENU"
-
 	call Game_init
-	
-	call Window_create
-	
-	
+
+	call Window_create	
 	call Window_handleMsg
 
 
