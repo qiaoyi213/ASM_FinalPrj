@@ -8,6 +8,7 @@ extern main_getHInstance: PROC
 extern Resource_getMobImgHandle: PROTO, :DWORD
 extern Resource_getBGImgBrush: PROTO
 extern DrawScore: PROTO, :HDC
+extern DrawLife: PROTO, :HDC
 Game_draw PROTO, :HWND
 
 .data
@@ -121,7 +122,8 @@ Game_draw PROC USES eax, hwnd :HWND
 	call	Resource_getBGImgBrush
 	INVOKE  SelectObject, hdcBuffer, eax									;選入筆刷
 	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY	;填充筆刷
-
+	
+	INVOKE	DrawLife, hdcBuffer
 	INVOKE 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
