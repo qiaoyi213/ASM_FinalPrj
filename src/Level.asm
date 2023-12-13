@@ -59,8 +59,6 @@ Mob_init PROC USES esi eax, mob: PTR Mob, _type: DWORD, X: DWORD, Y:DWORD, HP:DW
 	mov (Mob PTR [esi]).Y, eax
 	mov eax, HP
 	mov (Mob PTR [esi]).HP, eax
-    
-    mov (Mob PTR [esi]).Hit, 0
     ret
 Mob_init ENDP
 

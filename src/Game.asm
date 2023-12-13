@@ -5,9 +5,16 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern Resource_getMobImgHandle: PROTO, :DWORD
+extern Resource_getBGImgHandle: PROTO
 extern Level_Load: PROTO, level: DWORD, Mobs: PTR Mob
 extern Mob_init: PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :DWORD, :DWORD
+
+Game_paint PROTO, :HWND
+DrawMob PROTO, :HDC, :HDC, :Mob
+DrawMobs PROTO, :HDC, :HDC
+DrawBG PROTO, :HDC, :HDC
+
 .data
 Level	            BYTE		0
 Life				WORD		5
@@ -15,9 +22,12 @@ Life				WORD		5
 Score				BYTE		"0000", 0
 ScorePos			RECT		<1000, 20, 1280, 100>
 
-Mobs				Mob			5 DUP(<>)
+Mobs				Mob			_MOB_LIST_MAX_SIZE DUP(<>)
+MobAmount			DWORD		5
+
 TimerID				EQU			74
 t					DWORD		0
+
 hInstance			HINSTANCE	?
 GameClassName		BYTE		"GamePane", 0
 GameClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET GameClassName,?>
@@ -25,10 +35,6 @@ GameTitle			BYTE		"Game Title", 0
 game_hwnd			HWND		?	
 
 .code
-Game_paint PROTO, :HWND
-DrawMob PROTO, :HDC, :HDC, :DWORD, :DWORD,  :DWORD, :DWORD
-DrawMobs PROTO, :HDC, :HDC
-Detect_Collision PROTO, :LPARAM
 
 Game_init PROC
     call	main_getHInstance
@@ -78,7 +84,7 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		; Detect mouse and attack
-		invoke Detect_Collision, lParam
+		; invoke Detect_Collision, lParam
 		; mWriteLn "MOVE"
 	.ELSEIF uMsg == WM_TIMER
 		.IF t == 9
@@ -104,9 +110,9 @@ Game_paint PROC, hwnd: HWND
 	invoke  CreateCompatibleDC, eax  ;110 建立相同的設備內容作為來源
 	mov     hdcMem, eax
 
-	invoke DrawText, hdc, OFFSET Score, -1, OFFSET ScorePos, DT_CENTER ; Draw score
-
-	invoke DrawMobs, hdc, hdcMem
+	invoke	DrawBG, hdc, hdcMem
+	invoke	DrawText, hdc, OFFSET Score, -1, OFFSET ScorePos, DT_CENTER ; Draw score
+	invoke	DrawMobs, hdc, hdcMem
 
 
 	invoke  DeleteDC, hdcMem         ;119 釋放來源設備內容
@@ -114,78 +120,73 @@ Game_paint PROC, hwnd: HWND
 	ret
 Game_paint ENDP
 
+DrawBG PROC USES eax ebx ecx edx esi edi, hdc: HDC, hdcMem: HDC
+	LOCAL hTiles: DWORD
+	LOCAL vTiles: DWORD
 
-Detect_Collision PROC USES ecx, lParam:LPARAM
+	LOCAL hBitmap: DWORD
 
-	mov ecx, 5
-	mov edi, 0
-detect_collision_loop:
+	mov hTiles, (_WINDOW_WIDTH / 64)
+	mov vTiles, (_WINDOW_HEIGHT / 64)
 
-	invoke Collision_Check, lParam, Mobs[edi].X, Mobs[edi].Y
-	
-    .IF eax == 1
-		mWrite "ATTACK"
-		mov Mobs[edi].Hit, 1
-    .ENDIF
+	call Resource_getBGImgHandle
+	mov hBitmap, eax
+	invoke SelectObject, hdcMem, hBitmap
 
-	add edi, TYPE Mob
-	loop detect_collision_loop
+	mov edx, 0
+	.WHILE (edx < 400)
+
+		mov ebx, 0
+		.WHILE (ebx < 400)
+			mShow ebx
+			mShow edx
+			; invoke  BitBlt, hdc, ebx, edx, 64, 64, hdcMem,\
+			; 0, 0, SRCCOPY
+			; .IF eax != NULL
+			; 	call GetLastError
+			; 	ret
+			; .ENDIF
+
+			add ebx, 64
+		.ENDW
+
+		add edx, 64
+	.ENDW
+
 	ret
-Detect_Collision ENDP
+DrawBG ENDP
 
-DrawMobs PROC USES edi ecx eax, hdc, hdcMem
-
-	mov ecx, 5
+DrawMobs PROC USES edi  eax, hdc: HDC, hdcMem: HDC
+	mov ecx, MobAmount
 	mov edi, 0
 
 draw_mobs_loop:
-	
-	.IF Mobs[edi].Hit == 0
-		invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, Mobs[edi]._type, NULL
-	.ELSE
-		mWrite "A"
-		; invoke DrawMob, hdc, hdcMem, Mobs[edi].X, Mobs[edi].Y, _MOB_SLIME_HIT_ID, Mobs[edi].Hit
-		inc Mobs[edi].Hit
-		.IF Mobs[edi].Hit == 6
-			mov Mobs[edi].Hit, 0
-		.ENDIF
-	.ENDIF
+	invoke DrawMob, hdc, hdcMem, Mobs[edi]
 	add edi, TYPE Mob
 	loop draw_mobs_loop
+
 	ret 
 DrawMobs ENDP
 
-DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, X: DWORD, Y:DWORD, MOB_ID: DWORD, Hit: DWORD
-	LOCAL hBitmap: DWORD 
-	LOCAL imgX: DWORD
+DrawMob PROC USES ecx,hdc: HDC, hdcMem: HDC, mob: Mob
+	LOCAL hBitmap: DWORD
 
- 	invoke Resource_getMobImgHandle, MOB_ID ; eax is the handler
+ 	invoke Resource_getMobImgHandle, mob._type ; eax is the handler
 	mov hBitmap, eax
 	
 	; mWriteLn "DRAW MOB"
 	invoke  SelectObject, hdcMem, hBitmap     ;112 選定來源設備內容的位元圖
-	mov eax, 44
-	.IF MOB_ID == _MOB_SLIME_HIT_ID
-		sub Hit, 1
-		mShow Hit
-		mul Hit
-	.ELSE 
-		mul t
-	.ENDIF
-	mov imgX, eax
-	mov     eax, 0
-	mov     ecx, imgX
-	invoke  BitBlt,hdc,X,Y,44,30,hdcMem,\
+	mov ecx, 0
+	mov eax, 0
+	invoke  BitBlt,hdc, mob.X, mob.Y, 44, 30, hdcMem,\
 			ecx,eax,SRCCOPY         ;118 傳送位元圖到視窗的設備內
 	
 	ret
 DrawMob ENDP
 
 Game_Show PROC
-	
 	invoke ShowWindow, game_hwnd, SW_SHOW
 	invoke UpdateWindow, game_hwnd
-
 	ret
 Game_Show ENDP
 
