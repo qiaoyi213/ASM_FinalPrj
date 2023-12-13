@@ -14,9 +14,6 @@ Game_draw PROTO, :HWND
 Level	            BYTE		0
 Life				WORD		5
 
-Score				BYTE		"0000", 0
-ScorePos			RECT		<1000, 20, 1280, 100>
-
 TimerID				EQU			74
 t					DWORD		0
 
