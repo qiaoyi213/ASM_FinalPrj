@@ -5,9 +5,8 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 
-extern Resource_getMobImgBrush: PROTO, :Mob
-extern Resource_getBGImgBrush: PROTO
-extern Resource_getSlimeHandle: PROTO
+extern Resource_getMobImgHandle: PROTO, :Mob
+extern Resource_getBGImgHandle: PROTO
 
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
@@ -136,7 +135,8 @@ Game_draw PROC USES eax, hwnd :HWND
 Game_draw ENDP
 
 DrawBG PROC USES eax
-	call	Resource_getBGImgBrush
+	call	Resource_getBGImgHandle
+	invoke  CreatePatternBrush, eax
 	INVOKE  SelectObject, hdcBuffer, eax
 	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY
 	ret
@@ -160,11 +160,11 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	invoke 	CreateCompatibleDC, hdcBuffer
 	mov		tmpHdc, eax
 
-	invoke  Resource_getMobImgBrush, mob
-	invoke  SelectObject, tmpHdc, eax
-	invoke	PatBlt, tmpHdc, 
-	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
-			0, 0, SRCCOPY
+	; mShow eax
+	; invoke  Resource_getMobImgHandle, mob
+	; invoke  SelectObject, tmpHdc, eax
+	; invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
+	; 		0, 0, SRCCOPY
 
 	invoke  DeleteDC, tmpHdc
 	ret
