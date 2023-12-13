@@ -17,7 +17,6 @@ Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
     .IF level == 1
         mWriteLn "Load Level"
 
-
         mov ecx, 5
         
         mov esi, Mobs
@@ -46,12 +45,13 @@ Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
 Level_Load ENDP
 
 
-Mob_init PROC USES esi eax, mob: PTR Mob, _type: DWORD, X: DWORD, Y:DWORD, HP:DWORD
+Mob_init PROC USES esi eax, mob: PTR Mob, id: DWORD, X: DWORD, Y:DWORD, HP:DWORD
 
 	mov esi, mob
-    mShow esi
-	mov eax, _type
+	mov eax, id
 	mov (Mob PTR [esi])._type, eax
+	mov (Mob PTR [esi]).state, 0
+
 	mov eax, X
 	mov (Mob PTR [esi]).X, eax
     
@@ -59,6 +59,7 @@ Mob_init PROC USES esi eax, mob: PTR Mob, _type: DWORD, X: DWORD, Y:DWORD, HP:DW
 	mov (Mob PTR [esi]).Y, eax
 	mov eax, HP
 	mov (Mob PTR [esi]).HP, eax
+
     ret
 Mob_init ENDP
 

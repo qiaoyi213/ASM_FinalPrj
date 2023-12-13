@@ -5,10 +5,14 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 
-extern Resource_getMobImgHandle: PROTO, :DWORD
+extern Resource_getMobImgBrush: PROTO, :Mob
 extern Resource_getBGImgBrush: PROTO
+extern Resource_getSlimeHandle: PROTO
+
+extern Level_Load: PROTO, :DWORD, :PTR Mob
 
 Game_draw PROTO, :HWND
+DrawMob PROTO, :Mob
 
 .data
 Level	            BYTE		0
@@ -16,6 +20,9 @@ Life				WORD		5
 
 Score				BYTE		"0000", 0
 ScorePos			RECT		<1000, 20, 1280, 100>
+
+mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
+mobAmount			DWORD		5
 
 TimerID				EQU			74
 t					DWORD		0
@@ -74,7 +81,8 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		invoke	CreateCompatibleDC, eax
 		mov		hdcBuffer, eax
 
-		; invoke	Level_Load, 1, ADDR Mobs
+		invoke	Level_Load, 1, ADDR mobList
+		mov 	mobAmount, ecx
 
 	.ELSEIF uMsg == WM_PAINT
 		invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
@@ -118,13 +126,48 @@ Game_Hide PROC
 Game_Hide ENDP
 
 Game_draw PROC USES eax, hwnd :HWND
-	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
-	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
-	
-	call	Resource_getBGImgBrush
-	INVOKE  SelectObject, hdcBuffer, eax									;選入筆刷
-	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY	;填充筆刷
+	invoke  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
+	invoke  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
+
+	call DrawBG
+	call DrawMobs
+
 	ret
 Game_draw ENDP
+
+DrawBG PROC USES eax
+	call	Resource_getBGImgBrush
+	INVOKE  SelectObject, hdcBuffer, eax
+	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY
+	ret
+DrawBG ENDP
+
+DrawMobs PROC USES ecx esi
+	mov ecx, mobAmount
+	mov esi, 0
+
+draw_mobs_loop:
+	invoke DrawMob, mobList[esi]
+	add esi, TYPE Mob
+	loop draw_mobs_loop
+
+	ret
+DrawMobs ENDP
+
+DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
+	LOCAL tmpHdc: HDC
+
+	invoke 	CreateCompatibleDC, hdcBuffer
+	mov		tmpHdc, eax
+
+	invoke  Resource_getMobImgBrush, mob
+	invoke  SelectObject, tmpHdc, eax
+	invoke	PatBlt, tmpHdc, 
+	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
+			0, 0, SRCCOPY
+
+	invoke  DeleteDC, tmpHdc
+	ret
+DrawMob ENDP
 
 END
