@@ -26,6 +26,8 @@ BTN_START_TEXT			BYTE		"Start", 0
 BTN_EXIT_EXECCODE		HMENU		102
 BTN_EXIT_TEXT			BYTE		"Exit", 0
 
+mainHwnd				HWND		?
+
 .code
 StartMenu_init PROC
 	call	main_getHInstance
@@ -44,14 +46,16 @@ StartMenu_init PROC
 	ret
 StartMenu_init ENDP
 
-StartMenu_create PROC, main_hwnd: HWND
+StartMenu_create PROC USES edx, main_hwnd: HWND
 	LOCAL	sm_hwnd: HWND
 
+	mov 	edx, main_hwnd
+	mov 	mainHwnd, edx
 	
 	invoke  CreateWindowEx, NULL, OFFSET StartMenuClassName, OFFSET StartMenuTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
-			main_hwnd, NULL, hInstance, NULL
+			mainHwnd, NULL, hInstance, NULL
 	mov     sm_hwnd, eax
 
 	invoke  ShowWindow, sm_hwnd, SW_SHOW
@@ -89,6 +93,8 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 		mov eax, wParam
 		.IF eax == BTN_START_EXECCODE
 			invoke ShowWindow, hwnd, SW_HIDE
+
+			invoke Game_create, mainHwnd
 			call Game_Show
 			mWrite "START GAME"
 		.ELSEIF eax == BTN_EXIT_EXECCODE
