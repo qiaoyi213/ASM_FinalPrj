@@ -1,4 +1,6 @@
-SlimeHitImg BITMAP  ".\\assets\\Hit (44x30).bmp"
+BGImg		BITMAP	".\\assets\\background.bmp"
+
 SlimeImg	BITMAP	".\\assets\\slime.bmp"
+SlimeHitImg BITMAP  ".\\assets\\slimeHit.bmp"
 
 cursorFile  CURSOR  ".\\assets\\sword knight text select.cur"

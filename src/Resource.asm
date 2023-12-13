@@ -11,6 +11,9 @@ Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
 
 bitmapBuffer	BITMAP	<>
 
+BGImgHandle		DWORD	?
+__BGImg			BYTE	"BGImg"
+
 MobImgHandles	DWORD	_MOB_ID_SIZE DUP (?)
 
 __SlimeImg		BYTE 	"SlimeImg", 0
@@ -33,15 +36,22 @@ Resource_load PROC USES esi, hInstance: HINSTANCE, hPtr: PTR DWORD, resName: PTR
 Resource_load ENDP
 
 Resource_loadAll PROC, hInstance: HINSTANCE
+	; load background
+	invoke Resource_load, hInstance, OFFSET BGImgHandle, OFFSET __BGImg
+
 	; load mob images
 	invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_ID], OFFSET __SlimeImg
-	
 
 
 	; invoke Resource_load, hInstance, OFFSET MobImgHandles[_MOB_SLIME_HIT_ID], OFFSET __SlimeHitImg
 	; mShow MobImgHandles[1]
 	ret
 Resource_loadAll ENDP
+
+Resource_getBGImgHandle PROC
+	mov eax, BGImgHandle
+	ret
+Resource_getBGImgHandle ENDP
 
 Resource_getMobImgHandle PROC USES edx, id: DWORD
 	mov edx, id
