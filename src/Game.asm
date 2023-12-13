@@ -43,7 +43,7 @@ Game_init PROC
 	mov     GameClass.hInstance, eax
 	mov     GameClass.style, NULL
 	mov     GameClass.lpfnWndProc, OFFSET Game_Process
-	mov     GameClass.hbrBackground, COLOR_WINDOW+1
+	mov     GameClass.hbrBackground, NULL
 
 	invoke  LoadCursor, NULL, IDC_ARROW
 	mov     GameClass.hCursor, eax
