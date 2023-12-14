@@ -15,7 +15,6 @@ Window_MouseMove PROTO, :LPARAM
 .data
 hInstance			HINSTANCE	?
 
-
 windowClassName		BYTE		"GameWindow", 0
 windowClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET windowClassName,?>
 
