@@ -3,12 +3,13 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE Reference.inc
 
+extern Slime_Build: PROTO, :PTR Mob
+
+Mob_init PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
 
 .data
 
-
 .code
-Mob_init PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
 
 
 Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
@@ -16,7 +17,6 @@ Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
     
     .IF level == 1
         mWriteLn "Load Level"
-
 
         mov ecx, 5
         
@@ -46,20 +46,15 @@ Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
 Level_Load ENDP
 
 
-Mob_init PROC USES esi eax, mob: PTR Mob, _type: DWORD, X: DWORD, Y:DWORD, HP:DWORD
+Mob_init PROC USES esi eax, mob: PTR Mob, id: DWORD, X: DWORD, Y:DWORD, HP:DWORD
 
 	mov esi, mob
-    mShow esi
-	mov eax, _type
-	mov (Mob PTR [esi])._type, eax
+    invoke Slime_Build, esi
+
 	mov eax, X
 	mov (Mob PTR [esi]).X, eax
-    
 	mov eax, Y
 	mov (Mob PTR [esi]).Y, eax
-	mov eax, HP
-	mov (Mob PTR [esi]).HP, eax
-
     ret
 Mob_init ENDP
 

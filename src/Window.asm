@@ -7,16 +7,13 @@ INCLUDE Reference.inc
 extern main_getHInstance: PROC
 extern Resource_loadAll: PROTO, :HINSTANCE
 extern StartMenu_create: PROTO, :HWND
-extern Game_create: PROTO, :HWND
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 Window_Paint PROTO, :HWND
 Window_MouseMove PROTO, :LPARAM
 
-extern Game_create: PROTO, :HWND
 .data
 hInstance			HINSTANCE	?
-
 
 windowClassName		BYTE		"GameWindow", 0
 windowClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET windowClassName,?>
@@ -89,7 +86,6 @@ Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.IF uMsg == WM_CREATE
 		invoke Resource_loadAll, hInstance
 		
-		invoke Game_create, hwnd
 		invoke StartMenu_create, hwnd
 
 	.ELSEIF uMsg == WM_MOUSEMOVE
