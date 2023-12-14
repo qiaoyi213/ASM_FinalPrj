@@ -10,6 +10,8 @@ extern Resource_getBGImgHandle: PROTO
 
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
+extern Slime_update: PROTO, :PTR Mob
+
 Game_draw PROTO, :HWND
 DrawMob PROTO, :Mob
 
@@ -73,7 +75,7 @@ Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
-		invoke	SetTimer, hwnd, TimerID, 10, NULL
+		invoke	SetTimer, hwnd, TimerID, 100, NULL
 
 		invoke	GetDC, hwnd
 		mov		hdc, eax
@@ -92,13 +94,10 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		; invoke Detect_Collision, lParam
 		; mWriteLn "MOVE"
 	.ELSEIF uMsg == WM_TIMER
-		.IF t == 9
-			mov t, 0
-		.ENDIF
-		
+		call Game_update
 		invoke Game_draw, hwnd
 
-		inc t
+		
 		invoke InvalidateRect, hwnd, NULL, TRUE
 
 	.ELSEIF uMsg == WM_DESTROY
@@ -159,15 +158,29 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 
 	invoke 	CreateCompatibleDC, hdcBuffer
 	mov		tmpHdc, eax
+	invoke  Resource_getMobImgHandle, mob
+	invoke  SelectObject, tmpHdc, eax
 
-	; mShow eax
-	; invoke  Resource_getMobImgHandle, mob
-	; invoke  SelectObject, tmpHdc, eax
-	; invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
-	; 		0, 0, SRCCOPY
+	mov		eax, 44
+	mul		mob.AnimationTick
+
+	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
+			eax, 0, SRCCOPY
 
 	invoke  DeleteDC, tmpHdc
 	ret
 DrawMob ENDP
+
+Game_update PROC USES ecx esi edx
+	mov ecx, mobAmount
+	mov esi, 0
+
+update_mobs_loop:
+	invoke Slime_update, ADDR mobList[esi]
+	add esi, TYPE Mob
+	loop update_mobs_loop
+
+	ret
+Game_update ENDP
 
 END

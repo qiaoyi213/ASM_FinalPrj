@@ -35,6 +35,9 @@ Mob STRUCT
 
 	HP				DWORD		?
 
-	AttackClock		DWORD		?
-	AnimationClock	DWORD		?
+	AnimationTick	DWORD		?
+	AnimationEdge	DWORD		?
+	AttackTick		DWORD		?
+	AttackEdge		DWORD		?
+
 Mob ENDS
