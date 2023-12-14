@@ -35,7 +35,7 @@ Resource_load PROC USES esi eax, hInstance: HINSTANCE, hPtr: PTR DWORD, resName:
 	; invoke  LoadBitmap, hInstance, resName
 	invoke	LoadImage, hInstance, resName, IMAGE_BITMAP,\
 			NULL, NULL, LR_CREATEDIBSECTION
-	mShow eax
+	; mShow eax
 	
 	mov		[esi], eax
 	invoke  GetObject, [esi], SIZEOF bitmapBuffer, OFFSET bitmapBuffer	
