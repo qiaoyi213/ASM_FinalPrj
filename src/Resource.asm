@@ -12,7 +12,7 @@ Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
 bitmapBuffer	BITMAP	<>
 
 BGImgHandle		HBITMAP	?
-__BGImg			BYTE	"BGImg"
+__BGImg			BYTE	"BGImg", 0
 
 
 __TrunkImg		BYTE 	"TrunkImg", 0
@@ -35,7 +35,7 @@ Resource_load PROC USES esi eax, hInstance: HINSTANCE, hPtr: PTR DWORD, resName:
 	; invoke  LoadBitmap, hInstance, resName
 	invoke	LoadImage, hInstance, resName, IMAGE_BITMAP,\
 			NULL, NULL, LR_CREATEDIBSECTION
-	; mShow eax
+	mShow eax
 	
 	mov		[esi], eax
 	invoke  GetObject, [esi], SIZEOF bitmapBuffer, OFFSET bitmapBuffer	
@@ -45,17 +45,17 @@ Resource_load ENDP
 Resource_loadAll PROC, hInstance: HINSTANCE
 	; load background
 	invoke Resource_load, hInstance, OFFSET BGImgHandle, OFFSET __BGImg
-
+	
 	; load mobs
 	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 0], OFFSET __Slime0
 	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 1], OFFSET __Slime1
 	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 2], OFFSET __Slime2
 	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 3], OFFSET __Slime3
 	
-	; mShow MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 0]
-	; mShow MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 1]
-	; mShow MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 2]
-	; mShow MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 3]
+	; load heart
+	invoke Resource_load, hInstance, OFFSET HeartImgBrush[0], OFFSET __HeartEmptyImg
+	invoke Resource_load, hInstance, OFFSET HeartImgBrush[1], OFFSET __HeartFullImg
+	
 
 	ret
 Resource_loadAll ENDP
