@@ -63,7 +63,9 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 
 		.IF state == 2
 			mov state, 3
-		.ELSEIF state == 3
+		.ELSEIF state == 3 
+			mov state, 0
+		.ELSEIF state == 4
 			mov state, 0
 		.ENDIF
 	.ENDIF
@@ -76,7 +78,7 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 		mov state, 2
 		mov aniTick, 0
 	.ENDIF
-
+	
 	mov eax, state
 	mov ebx, AnimationEdges[eax * TYPE DWORD]
 	mov aniEdge, ebx

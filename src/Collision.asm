@@ -7,7 +7,7 @@ INCLUDE Reference.inc
 
 .code
 
-Collision_Check PROC USES ebx, lParam:LPARAM, X:DWORD, Y:DWORD
+Collision_Check PROC USES ebx, lParam:LPARAM, mob:Mob
 	LOCAL mouseX: DWORD
 	LOCAL mouseY: DWORD
 
@@ -17,33 +17,26 @@ Collision_Check PROC USES ebx, lParam:LPARAM, X:DWORD, Y:DWORD
     mov eax, lParam
     shr eax, 10h
     mov mouseY, eax
-    ; .IF Tmp_Mob.X <= mouseX  AND Tmp_Mob.X >= mouseX and Tmp_Mob.Y <= mouseY and Tmp_Mob.Y >= mouseY
-	; 	mWrite "ATTACK"
-    ; .ENDIF
-    ; mShow mouseX
-    ; mShow mouseY
-    ; mShow X
-    ; mShow Y
-    mov ebx, X
+
+    mov ebx, mob.X
     add ebx, 44
     
-  
-
+    ; mShow mob.X
+    ; mShow mob.Y
     
     .IF mouseX <= ebx
-        mov ebx, X
+        mov ebx, mob.X
         
         .IF mouseX >= ebx
-            mov ebx, Y
+            mov ebx, mob.Y
             add ebx, 30
             
             .IF mouseY <= ebx
-                mov ebx, Y
+                mov ebx, mob.Y
                 
                 .IF mouseY >= ebx
                     mov eax, 1
-                    
-                    
+
                     ret
                 .ENDIF
             .ENDIF
