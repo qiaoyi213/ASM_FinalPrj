@@ -12,7 +12,8 @@ extern Level_Load: PROTO, :DWORD, :PTR Mob
 
 extern Slime_update: PROTO, :PTR Mob
 
-
+extern Collision_Check: PROTO, :LPARAM, :Mob
+extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
 Game_draw PROTO, :HWND
@@ -92,6 +93,24 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		; Detect mouse and attack
 		; invoke Detect_Collision, lParam
 		; mWriteLn "MOVE"
+		mov ecx, 5
+		mov esi, 0
+		__detect_state_loop:
+			invoke Collision_Check, lParam, mobList[esi]
+			.IF eax == 1
+				.IF mobList[esi].state == 3
+					mov mobList[esi].state, 4
+					;mWriteLn "Player has been attacked"
+					invoke Life_Sub, 1
+				.ELSE
+					sub mobList[esi].HP, 25
+					mWriteLn "Mob has been ATTACK"
+				.ENDIF
+				
+			.ENDIF
+			add esi, TYPE Mob
+		loop __detect_state_loop
+		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
 		invoke Game_draw, hwnd
@@ -166,7 +185,7 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 
 	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
 			eax, 0, SRCCOPY
-
+	
 	invoke  DeleteDC, tmpHdc
 	ret
 DrawMob ENDP

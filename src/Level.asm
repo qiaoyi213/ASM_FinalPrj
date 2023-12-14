@@ -25,7 +25,6 @@ Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
         invoke Mob_init, esi, _MOB_SLIME_ID, 640, 360, 100
         add esi, TYPE Mob
 
-        
         invoke Mob_init, esi, _MOB_SLIME_ID, 740, 360, 100
         add esi, TYPE Mob
         

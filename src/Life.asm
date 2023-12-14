@@ -12,6 +12,7 @@ Life    DWORD    5
 Life_Sub PROC USES edx, num: DWORD
     mov edx, num
     sub Life, edx
+    mShow Life
     ret
 Life_Sub ENDP
 
@@ -36,7 +37,7 @@ DrawLife PROC USES ecx edx, hdcBuffer: HDC
 	invoke	Resource_getHeartImgHandle, 1
 	invoke  SelectObject, tmpHdc, eax
 
-    mShow eax
+    ; mShow eax
     mov edx, 0
     mov ecx, Life
 draw_life_loop:
