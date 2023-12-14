@@ -1,6 +1,9 @@
-BGImg		BITMAP	".\\assets\\background.bmp"
+BGImg		    BITMAP	".\\assets\\background.bmp"
 
-SlimeImg	BITMAP	".\\assets\\slime.bmp"
-SlimeHitImg BITMAP  ".\\assets\\slimeHit.bmp"
+SlimeImg	    BITMAP	".\\assets\\slime.bmp"
+SlimeHitImg     BITMAP  ".\\assets\\slimeHit.bmp"
 
-cursorFile  CURSOR  ".\\assets\\sword knight text select.cur"
+cursorFile      CURSOR  ".\\assets\\sword knight text select.cur"
+
+HeartFullImg    BITMAP  ".\\assets\\HeartFull.bmp"
+HeartEmptyImg    BITMAP  ".\\assets\\HeartEmpty.bmp"

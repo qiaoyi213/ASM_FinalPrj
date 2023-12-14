@@ -26,7 +26,6 @@ game_hwnd			HWND		?
 
 hdc					HDC			?
 hdcBuffer			HDC			?
-
 .code
 
 Game_init PROC

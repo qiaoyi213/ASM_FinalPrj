@@ -3,19 +3,46 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE Reference.inc
 
-extern Number_to_String:PROTO, :DWORD, :PTR BYTE, :DWORD
 
+extern Resource_getHeartImgHandle: PROTO, :DWORD
 .data
-LifeText    BYTE        "5"
+Life    DWORD    5
 .code 
 
-DrawLife PROC USES ecx, hdcBuffer: HDC
-    LOCAL   OldMode: DWORD
-	invoke 	SetBkMode, hdcBuffer, TRANSPARENT								;設定以透明顯示
-    mov     OldMode, eax
+Life_Sub PROC USES edx, num: DWORD
+    mov edx, num
+    sub Life, edx
+    ret
+Life_Sub ENDP
 
-	invoke	TextOut, hdcBuffer, 100, 20, OFFSET LifeText, LENGTHOF LifeText
-	invoke 	SetBkMode, hdcBuffer, OldMode										;設定回原本的模式顯示
+Life_Add PROC USES edx, num: DWORD
+    mov edx, num
+    add Life, edx
+    ret
+Life_Add ENDP
+
+Life_Change PROC USES edx, num: DWORD
+    mov edx, num
+    mov Life, edx
+    ret
+Life_Change ENDP
+
+DrawLife PROC USES ecx edx, hdcBuffer: HDC
+
+    
+    invoke	Resource_getHeartImgHandle,1
+    INVOKE  SelectObject, hdcBuffer, eax									;選入筆刷
+    mov edx, 0
+    mov ecx, Life
+draw_life_loop:
+    push ecx
+    push edx
+	INVOKE  PatBlt, hdcBuffer, edx, 0, 36, 32, PATCOPY	;填充筆刷
+    pop edx
+    pop ecx
+    add edx,36
+    loop draw_life_loop
+	
     ret
 DrawLife ENDP
 

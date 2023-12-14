@@ -21,6 +21,9 @@ __SlimeHitImg	BYTE	"SlimeHitImg", 0
 __TrunkImg		BYTE 	"TrunkImg", 0
 __MushroomImg	BYTE 	"MushroomImg", 0
 
+HeartImgBrush	HBRUSH	2 DUP (?)
+__HeartFullImg	BYTE	"HeartFullImg", 0
+__HeartEmptyImg	BYTE	"HeartEmptyImg", 0
 SlimeBrush		HBRUSH	?
 
 .code
@@ -37,6 +40,10 @@ Resource_load ENDP
 Resource_loadAll PROC, hInstance: HINSTANCE
 	; load background
 	invoke Resource_load, hInstance, OFFSET BGImgBrush, OFFSET __BGImg
+	
+	; load	heart
+	invoke Resource_load, hInstance, OFFSET HeartImgBrush[0], OFFSET __HeartEmptyImg
+	invoke Resource_load, hInstance, OFFSET HeartImgBrush[1], OFFSET __HeartFullImg
 	ret
 Resource_loadAll ENDP
 
@@ -51,5 +58,11 @@ Resource_getMobImgHandle PROC USES edx, id: DWORD
 
 	ret
 Resource_getMobImgHandle ENDP
+
+Resource_getHeartImgHandle PROC USES edx, id: DWORD
+	mov edx, id
+	mov eax, HeartImgBrush[edx]
+	ret
+Resource_getHeartImgHandle ENDP
 
 END
