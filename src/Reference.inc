@@ -28,6 +28,7 @@ Mob STRUCT
 	; 1: been hit
 	; 2: going to attack
 	; 3: attacking
+	; 4: DEAD
 	state			DWORD		?
 
 	X				DWORD		?
@@ -39,5 +40,8 @@ Mob STRUCT
 	AnimationEdge	DWORD		?
 	AttackTick		DWORD		?
 	AttackEdge		DWORD		?
-
+	
+	InvincibleTick	DWORD		?
+	Invincible		DWORD		?
+	
 Mob ENDS
