@@ -6,9 +6,6 @@ INCLUDE ../Reference.inc
 extern Score_Add :PROTO, :DWORD
 
 .data
-	_width			DWORD	44
-	_height			DWORD	30
-
 	AttackEdge		DWORD	50
 	AnimationEdges	DWORD	10, 5, 10, 10
 .code
@@ -18,6 +15,9 @@ Slime_Build PROC, mptr: PTR Mob
 
 	mov (Mob PTR [esi])._type, _MOB_SLIME_ID
 	mov (Mob PTR [esi]).state, 0
+
+	mov (Mob PTR [esi])._width, 44
+	mov (Mob PTR [esi])._height, 30
 
 	mov (Mob PTR [esi]).HP, 100
 
