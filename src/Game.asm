@@ -106,10 +106,7 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 						jmp __detect_state_loop
 					_mid_2:
 				.ELSEIF mobList[esi].Invincible == 0
-					mShow mobList[esi].Invincible
-					mov mobList[esi].Invincible, 1
 					invoke Slime_hert, ADDR mobList[esi], 25
-					mov mobList[esi].state, 1
 					
 				.ENDIF
 			.ENDIF
