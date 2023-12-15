@@ -33,6 +33,8 @@ Mob STRUCT
 
 	X				DWORD		?
 	Y				DWORD		?
+	_width			DWORD		?
+	_height			DWORD		?
 
 	HP				DWORD		?
 
@@ -41,7 +43,6 @@ Mob STRUCT
 	AttackTick		DWORD		?
 	AttackEdge		DWORD		?
 	
-	InvincibleTick	DWORD		?
-	Invincible		DWORD		?
+	isTouched		DWORD		?
 	
 Mob ENDS

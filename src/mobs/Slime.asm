@@ -29,8 +29,7 @@ Slime_Build PROC, mptr: PTR Mob
 	mov eax, AttackEdge
 	mov (Mob PTR [esi]).AttackEdge, eax
 
-	mov (Mob PTR [esi]).Invincible, 0
-	mov (Mob PTR [esi]).InvincibleTick, 0
+	mov (Mob PTR [esi]).isTouched, 0
 	ret
 Slime_Build ENDP
 
@@ -40,9 +39,6 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	LOCAL aniEdge: DWORD
 	LOCAL atkTick: DWORD
 	LOCAL atkEdge: DWORD
-	LOCAL invTick: DWORD
-	LOCAL inv: DWORD
-	LOCAL edge: DWORD
 	
 	
 	mov esi, mptr
@@ -56,10 +52,6 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	mov atkTick, eax
 	mov eax, (Mob PTR [esi]).AttackEdge
 	mov atkEdge, eax
-	mov eax, (Mob PTR [esi]).InvincibleTick
-	mov invTick, eax
-	mov eax, (Mob PTR [esi]).Invincible
-	mov inv, eax
 	
 	inc aniTick
 
@@ -91,16 +83,6 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 		mov state, 2
 		mov aniTick, 0
 	.ENDIF
-
-	.IF inv == 1
-		inc invTick
-	.ENDIF
-	
-	.IF invTick >= 10
-		mov invTick, 0
-		mov inv, 0
-	.ENDIF
-		
 	
 	mov eax, state
 	mov ebx, AnimationEdges[eax * TYPE DWORD]
@@ -116,10 +98,6 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	mov (Mob PTR [esi]).AttackTick, eax
 	mov eax, atkEdge
 	mov (Mob PTR [esi]).AttackEdge, eax 
-	mov eax, invTick
-	mov (Mob PTR [esi]).InvincibleTick, eax
-	mov eax, inv
-	mov (Mob PTR [esi]).Invincible, eax
 
 	ret	
 Slime_update ENDP
@@ -130,9 +108,6 @@ Slime_hert PROC USES eax esi, mptr: PTR Mob, MATK: DWORD
 	sub eax, MATK
 
 	mov (Mob PTR [esi]).HP, eax
-	mov (Mob PTR [esi]).Invincible, 1
-	mov (Mob PTR [esi]).state, 1
-	mov (Mob PTR [esi]).AnimationTick, 0
 
 	.IF (Mob PTR [esi]).HP <= 0
 		mov (Mob PTR [esi]).state, 4

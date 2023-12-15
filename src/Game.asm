@@ -27,7 +27,6 @@ mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
 mobAmount			DWORD		5
 
 TimerID				EQU			74
-t					DWORD		0
 
 hInstance			HINSTANCE	?
 GameClassName		BYTE		"GamePane", 0
@@ -90,28 +89,25 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 				0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		; Detect mouse and attack
-		; invoke Detect_Collision, lParam
-		; mWriteLn "MOVE"
-		mov ecx, 5
+		mov ecx, 0
 		mov esi, 0
-		__detect_state_loop:
+		.WHILE ecx < mobAmount
 			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1
-				.IF mobList[esi].state == 3
-					mov mobList[esi].state, 1
+			.IF eax == 1 && mobList[esi].state == 3
 					invoke Life_Sub, 1
-					jmp _mid_2
-					_mid_1:
-						jmp __detect_state_loop
-					_mid_2:
-				.ELSEIF mobList[esi].Invincible == 0
-					invoke Slime_hert, ADDR mobList[esi], 25
-					
-				.ENDIF
 			.ENDIF
+
+			.IF eax == 1 && mobList[esi].isTouched == 0
+				mov mobList[esi].isTouched, 1
+				invoke Slime_hert, ADDR mobList[esi], 25
+			.ENDIF
+
+			.IF eax == 0 && mobList[esi].isTouched == 1
+				mov mobList[esi].isTouched, 0
+			.ENDIF
+			inc ecx
 			add esi, TYPE Mob
-		loop _mid_1
+		.ENDW
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
