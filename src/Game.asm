@@ -169,6 +169,7 @@ DrawMobs PROC USES ecx esi
 	mov esi, 0
 
 draw_mobs_loop:
+	invoke DrawMob, mobList[esi]
 	add esi, TYPE Mob
 	loop draw_mobs_loop
 

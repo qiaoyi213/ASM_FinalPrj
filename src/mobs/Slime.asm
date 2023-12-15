@@ -94,12 +94,9 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 
 	.IF inv == 1
 		inc invTick
-		mShow invTick
 	.ENDIF
-
-	mov eax, invTick
 	
-	.IF eax >= 10
+	.IF invTick >= 10
 		mov invTick, 0
 		mov inv, 0
 	.ENDIF
