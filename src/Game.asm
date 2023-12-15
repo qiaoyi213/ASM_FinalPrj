@@ -11,7 +11,7 @@ extern Resource_getBGImgHandle: PROTO
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
 extern Slime_update: PROTO, :PTR Mob
-
+extern Slime_hert: PROTO, :PTR Mob, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
@@ -99,22 +99,26 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 			invoke Collision_Check, lParam, mobList[esi]
 			.IF eax == 1
 				.IF mobList[esi].state == 3
-					mov mobList[esi].state, 4
-					;mWriteLn "Player has been attacked"
+					mov mobList[esi].state, 1
 					invoke Life_Sub, 1
-				.ELSE
-					sub mobList[esi].HP, 25
-					mWriteLn "Mob has been ATTACK"
+					jmp _mid_2
+					_mid_1:
+						jmp __detect_state_loop
+					_mid_2:
+				.ELSEIF mobList[esi].Invincible == 0
+					mShow mobList[esi].Invincible
+					mov mobList[esi].Invincible, 1
+					invoke Slime_hert, ADDR mobList[esi], 25
+					mov mobList[esi].state, 1
+					
 				.ENDIF
-				
 			.ENDIF
 			add esi, TYPE Mob
-		loop __detect_state_loop
+		loop _mid_1
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
 		invoke Game_draw, hwnd
-
 		
 		invoke InvalidateRect, hwnd, NULL, TRUE
 
@@ -165,7 +169,6 @@ DrawMobs PROC USES ecx esi
 	mov esi, 0
 
 draw_mobs_loop:
-	invoke DrawMob, mobList[esi]
 	add esi, TYPE Mob
 	loop draw_mobs_loop
 
@@ -179,6 +182,8 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	mov		tmpHdc, eax
 	invoke  Resource_getMobImgHandle, mob
 	invoke  SelectObject, tmpHdc, eax
+
+	
 
 	mov		eax, 44
 	mul		mob.AnimationTick
