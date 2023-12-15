@@ -16,6 +16,7 @@ extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
+extern PlotIMG: PROTO, :HDC
 Game_draw PROTO, :HWND
 DrawMob PROTO, :Mob
 
@@ -149,6 +150,8 @@ Game_draw PROC USES eax, hwnd :HWND
 	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
 	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
 	
+	invoke PlotIMG, hdcBuffer
+
 	call DrawBG
 	call DrawMobs
 	INVOKE	DrawLife, hdcBuffer
@@ -170,6 +173,7 @@ DrawMobs PROC USES ecx esi
 
 draw_mobs_loop:
 	add esi, TYPE Mob
+	invoke DrawMob, mobList[esi]
 	loop draw_mobs_loop
 
 	ret

@@ -45,3 +45,10 @@ Mob STRUCT
 	Invincible		DWORD		?
 	
 Mob ENDS
+
+GdiplusStartupInput STRUCT
+    GdiplusVersion dword ?
+    DebugEventCallback dword ?
+    SuppressBackgroundThread dword ?
+    SuppressExternalCodecs dword ?
+GdiplusStartupInput ENDS
