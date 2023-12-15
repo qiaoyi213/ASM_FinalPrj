@@ -24,7 +24,7 @@ Level	            BYTE		0
 Life				WORD		5
 
 mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
-mobAmount			DWORD		5
+mobAmount			DWORD		0
 
 TimerID				EQU			74
 
@@ -69,9 +69,10 @@ Game_create PROC, main_hwnd: HWND
 
     invoke  ShowWindow, game_hwnd, SW_HIDE
 	invoke  UpdateWindow, game_hwnd
+
+	call Randomize
     
 	mov eax, game_hwnd
-
     ret
 Game_create ENDP
 
@@ -164,13 +165,14 @@ DrawBG PROC USES eax
 DrawBG ENDP
 
 DrawMobs PROC USES ecx esi
-	mov ecx, mobAmount
-	mov esi, 0
+	mov ecx, 0
+	lea esi, mobList
 
-draw_mobs_loop:
-	invoke DrawMob, mobList[esi]
-	add esi, TYPE Mob
-	loop draw_mobs_loop
+	.WHILE ecx < mobAmount
+		invoke DrawMob, Mob PTR [esi]
+		add esi, TYPE Mob
+		inc ecx
+	.ENDW
 
 	ret
 DrawMobs ENDP
@@ -183,7 +185,7 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	invoke  Resource_getMobImgHandle, mob
 	invoke  SelectObject, tmpHdc, eax
 
-	
+
 
 	mov		eax, 44
 	mul		mob.AnimationTick
