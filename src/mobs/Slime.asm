@@ -80,7 +80,7 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 		.ELSEIF state == 3 
 			mov state, 0
 		.ELSEIF state == 1
-			mov state, 2 
+			mov state, 0
 		.ENDIF
 	.ENDIF
 
@@ -130,6 +130,9 @@ Slime_hert PROC USES eax esi, mptr: PTR Mob, MATK: DWORD
 	sub eax, MATK
 
 	mov (Mob PTR [esi]).HP, eax
+	mov (Mob PTR [esi]).Invincible, 1
+	mov (Mob PTR [esi]).state, 1
+	mov (Mob PTR [esi]).AnimationTick, 0
 
 	.IF (Mob PTR [esi]).HP <= 0
 		mov (Mob PTR [esi]).state, 4
