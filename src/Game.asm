@@ -36,6 +36,9 @@ game_hwnd			HWND		?
 
 hdc					HDC			?
 hdcBuffer			HDC			?
+
+isInvincible		DWORD		0
+invincibleTick		DWORD		0
 .code
 
 Game_init PROC
@@ -94,7 +97,10 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		.WHILE ecx < mobAmount
 			invoke Collision_Check, lParam, mobList[esi]
 			.IF eax == 1 && mobList[esi].state == 3
+				.IF isInvincible == 0
 					invoke Life_Sub, 1
+					mov isInvincible, 1
+				.ENDIF
 			.ENDIF
 
 			.IF eax == 1 && mobList[esi].isTouched == 0
@@ -192,6 +198,13 @@ DrawMob ENDP
 Game_update PROC USES ecx esi edx
 	mov ecx, mobAmount
 	mov esi, 0
+	
+	mov edx, isInvincible
+	add invincibleTick, edx
+	.IF invincibleTick >= 10
+		mov isInvincible, 0
+		mov invincibleTick, 0
+	.ENDIF
 
 update_mobs_loop:
 	invoke Slime_update, ADDR mobList[esi]
