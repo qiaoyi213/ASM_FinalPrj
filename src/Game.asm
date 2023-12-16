@@ -38,6 +38,9 @@ game_hwnd			HWND		?
 
 hdc					HDC			?
 hdcBuffer			HDC			?
+
+GpInput     		GdiplusStartupInput <1,0,0,0>
+hToken        		dd      	?
 .code
 
 Game_init PROC
@@ -135,8 +138,12 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 Game_Process ENDP
 
 Game_Show PROC
+	invoke   GdiplusStartup,offset hToken,offset GpInput,NULL
+
 	invoke ShowWindow, game_hwnd, SW_SHOW
 	invoke UpdateWindow, game_hwnd
+
+	invoke   GdiplusShutdown,hToken
 	ret
 Game_Show ENDP
 
@@ -153,6 +160,7 @@ Game_draw PROC USES eax, hwnd :HWND
 
 	call DrawBG
 	call DrawMobs
+	
 	INVOKE	DrawLife, hdcBuffer
 	INVOKE 	DrawScore, hdcBuffer
 	ret
