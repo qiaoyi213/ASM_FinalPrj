@@ -1,14 +1,15 @@
 # CONFIG ZONE #
 $LIBRARY_DIRS_ARRAY = @(
 	"Irvine",
-	"C:\UASM\lib"
+	"C:\uasm\lib"
 )
 
 $LIBRARY_NAME_ARRAY = @(
 	"Irvine32",
 	"Kernel32",
 	"User32",
-	"Gdi32"
+	"gdi32",
+	"gdiplus"
 )
 
 # WORKING ZONE #
