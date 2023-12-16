@@ -1,4 +1,4 @@
-BGImg   BITMAP	".\\assets\\background.bmp"
+BGImg   PNG	".\\assets\\background.png"
 
 Slime0	BITMAP	".\\assets\\slime0.bmp"
 Slime1	BITMAP  ".\\assets\\slime1.bmp"

@@ -11,7 +11,9 @@ extern Window_handleMsg: PROC
 
 extern StartMenu_init: PROC
 extern Game_init: PROC
-extern StartGP: PROC
+extern Resource_init: PROC
+extern Resource_cleanUp: PROC
+
 .data
 	hInstance	HINSTANCE	?
 	
@@ -22,15 +24,16 @@ extern StartGP: PROC
 .code
 
 main PROC
-	call StartGP
-	; call Boot
-	; call Window_init
- 	; call StartMenu_init
-	; call Game_init
+	call Boot
+	call Resource_init
+	call Window_init
+ 	call StartMenu_init
+	call Game_init
+	
 
-	; call Window_create	
-	; call Window_handleMsg
-
+	call Window_create	
+	call Window_handleMsg
+	call Resource_cleanUp
 
 	invoke  ExitProcess, eax
 

@@ -96,9 +96,9 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 
 			invoke Game_create, mainHwnd
 			call Game_Show
-			mWrite "START GAME"
+			mWriteLn "START GAME"
 		.ELSEIF eax == BTN_EXIT_EXECCODE
-			mWrite "EXIT GAME"
+			mWriteLn "EXIT GAME"
 		.ENDIF
 	.ENDIF
 

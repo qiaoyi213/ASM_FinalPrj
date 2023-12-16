@@ -1,23 +1,23 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 
-extern Resource_getMobImgHandle: PROTO, :Mob
-extern Resource_getBGImgHandle: PROTO
-
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
-extern Slime_update: PROTO, :PTR Mob
-extern Slime_hert: PROTO, :PTR Mob, :DWORD
-extern Collision_Check: PROTO, :LPARAM, :Mob
-extern Life_Sub: PROTO, :DWORD
-extern DrawScore: PROTO, :HDC
-extern DrawLife: PROTO, :HDC
-extern PlotIMG: PROTO, :HDC
-Game_draw PROTO, :HWND
+extern Resource_loadAll: PROTO
+extern Resource_getBGImg: PROC
+
+; extern Slime_update: PROTO, :PTR Mob
+; extern Slime_hert: PROTO, :PTR Mob, :DWORD
+; extern Collision_Check: PROTO, :LPARAM, :Mob
+; extern Life_Sub: PROTO, :DWORD
+; extern DrawScore: PROTO, :HDC
+; extern DrawLife: PROTO, :HDC
+; extern PlotIMG: PROTO, :HDC
 DrawMob PROTO, :Mob
 
 .data
@@ -35,11 +35,13 @@ GameClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET GameClassName,?>
 GameTitle			BYTE		"Game Title", 0
 game_hwnd			HWND		?
 
-hdc					HDC			?
-hdcBuffer			HDC			?
+; cacheImage			DWORD		?	; PTR GpBitmap
+; cacheGraphic		DWORD		?	; PTR GpGraphics
+mainGraphic			DWORD		?	; PTR GpGraphics
 
 isInvincible		DWORD		0
 invincibleTick		DWORD		0
+
 .code
 
 Game_init PROC
@@ -78,54 +80,55 @@ Game_create PROC, main_hwnd: HWND
 Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+	local    @gdip
+
     .IF uMsg == WM_CREATE
+		call	Resource_loadAll
 		invoke	SetTimer, hwnd, TimerID, 100, NULL
 
-		invoke	GetDC, hwnd
-		mov		hdc, eax
-		invoke	CreateCompatibleDC, eax
-		mov		hdcBuffer, eax
+		invoke	GdipCreateFromHWND, hwnd, ADDR mainGraphic
+		; invoke	GdipCreateBitmapFromGraphics, _WINDOW_WIDTH, _WINDOW_HEIGHT, ADDR mainGraphic, ADDR cacheImage
 
 		invoke	Level_Load, 1, ADDR mobList
 		mov 	mobAmount, ecx
 
 	.ELSEIF uMsg == WM_PAINT
-		invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
-				0, 0, SRCCOPY
+		mWriteLn "paint"
+		; invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
+				; 0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		mov ecx, 0
-		mov esi, 0
-		.WHILE ecx < mobAmount
-			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1 && mobList[esi].state == 3
-				.IF isInvincible == 0
-					invoke Life_Sub, 1
-					mov isInvincible, 1
-				.ENDIF
-			.ENDIF
+		; mov ecx, 0
+		; mov esi, 0
+		; .WHILE ecx < mobAmount
+		; 	invoke Collision_Check, lParam, mobList[esi]
+		; 	.IF eax == 1 && mobList[esi].state == 3
+		; 		.IF isInvincible == 0
+		; 			invoke Life_Sub, 1
+		; 			mov isInvincible, 1
+		; 		.ENDIF
+		; 	.ENDIF
 
-			.IF eax == 1 && mobList[esi].isTouched == 0
-				mov mobList[esi].isTouched, 1
-				invoke Slime_hert, ADDR mobList[esi], 25
-			.ENDIF
+		; 	.IF eax == 1 && mobList[esi].isTouched == 0
+		; 		mov mobList[esi].isTouched, 1
+		; 		invoke Slime_hert, ADDR mobList[esi], 25
+		; 	.ENDIF
 
-			.IF eax == 0 && mobList[esi].isTouched == 1
-				mov mobList[esi].isTouched, 0
-			.ENDIF
-			inc ecx
-			add esi, TYPE Mob
-		.ENDW
+		; 	.IF eax == 0 && mobList[esi].isTouched == 1
+		; 		mov mobList[esi].isTouched, 0
+		; 	.ENDIF
+		; 	inc ecx
+		; 	add esi, TYPE Mob
+		; .ENDW
 		
 	.ELSEIF uMsg == WM_TIMER
-		call Game_update
-		invoke Game_draw, hwnd
+		; call Game_update
+		call Game_draw
 		
 		invoke InvalidateRect, hwnd, NULL, TRUE
 
 	.ELSEIF uMsg == WM_DESTROY
-		invoke  DeleteDC, hdcBuffer
-		invoke	ReleaseDC, hwnd, hdc
+		invoke	GdipDeleteGraphics, mainGraphic
 		mWriteLn "Destory"
 
     .ENDIF
@@ -146,23 +149,17 @@ Game_Hide PROC
 	ret
 Game_Hide ENDP
 
-Game_draw PROC USES eax, hwnd :HWND
-	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
-	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
-	
-
+Game_draw PROC USES eax
 	call DrawBG
 	call DrawMobs
-	INVOKE	DrawLife, hdcBuffer
-	INVOKE 	DrawScore, hdcBuffer
+	; INVOKE	DrawLife, hdcBuffer
+	; INVOKE 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
 
 DrawBG PROC USES eax
-	call	Resource_getBGImgHandle
-	invoke  CreatePatternBrush, eax
-	INVOKE  SelectObject, hdcBuffer, eax
-	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY
+	call 	Resource_getBGImg
+	invoke	GdipDrawImageRectI, mainGraphic, eax, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT
 	ret
 DrawBG ENDP
 
@@ -182,40 +179,46 @@ DrawMobs ENDP
 DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	LOCAL tmpHdc: HDC
 
-	invoke 	CreateCompatibleDC, hdcBuffer
-	mov		tmpHdc, eax
-	invoke  Resource_getMobImgHandle, mob
-	invoke  SelectObject, tmpHdc, eax
+	; invoke 	CreateCompatibleDC, hdcBuffer
+	; mov		tmpHdc, eax
+	; invoke  Resource_getMobImgHandle, mob
+	; invoke  SelectObject, tmpHdc, eax
 
-
-
+	; invoke	Resource_getMobImg, mob
+	mov		ebx, eax
 	mov		eax, 44
 	mul		mob.AnimationTick
+	invoke	GdipDrawImagePointRectI, mainGraphic, ebx, mob.X, mob.Y, eax, 0, 44, 30, NULL
 
-	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
-			eax, 0, SRCCOPY
+
+
+	; mov		eax, 44
+	; mul		mob.AnimationTick
+
+	; invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
+	; 		eax, 0, SRCCOPY
 	
-	invoke  DeleteDC, tmpHdc
+	; invoke  DeleteDC, tmpHdc
 	ret
 DrawMob ENDP
 
-Game_update PROC USES ecx esi edx
-	mov ecx, mobAmount
-	mov esi, 0
+; Game_update PROC USES ecx esi edx
+; 	mov ecx, mobAmount
+; 	mov esi, 0
 	
-	mov edx, isInvincible
-	add invincibleTick, edx
-	.IF invincibleTick >= 10
-		mov isInvincible, 0
-		mov invincibleTick, 0
-	.ENDIF
+; 	mov edx, isInvincible
+; 	add invincibleTick, edx
+; 	.IF invincibleTick >= 10
+; 		mov isInvincible, 0
+; 		mov invincibleTick, 0
+; 	.ENDIF
 
-update_mobs_loop:
-	invoke Slime_update, ADDR mobList[esi]
-	add esi, TYPE Mob
-	loop update_mobs_loop
+; update_mobs_loop:
+; 	invoke Slime_update, ADDR mobList[esi]
+; 	add esi, TYPE Mob
+; 	loop update_mobs_loop
 
-	ret
-Game_update ENDP
+; 	ret
+; Game_update ENDP
 
 END
