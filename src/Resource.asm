@@ -7,7 +7,7 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 
-Resource_load PROTO, :PTR BYTE, :PTR PTR GpImage
+Resource_load PROTO, :PTR BYTE, :PTR DWORD
 
 .data
 	GpInput			GdiplusStartupInput <1, 0, 0, 0>
@@ -20,6 +20,11 @@ Resource_load PROTO, :PTR BYTE, :PTR PTR GpImage
 
 	bgImg			DWORD		?
 	__bgName		BYTE		"bg", 0
+
+	heartEmpty		DWORD		?
+	__heartEmpty	BYTE		"HeartEmpty", 0
+	heartFull		DWORD		?
+	__heartFull		BYTE		"HeartFull", 0
 
 	MobImg			DWORD		(_MOB_STATE_SIZE * _MOB_ID_SIZE) DUP (0)
 	__slime0		BYTE 		"slime0", 0
@@ -41,7 +46,7 @@ Resource_cleanUp PROC
 	ret
 Resource_cleanUp ENDP
 
-Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR PTR GpImage
+Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR DWORD
 format_directory:
 	mov esi, OFFSET __resource
 	mov edi, OFFSET NameBuf
@@ -76,9 +81,13 @@ Resource_load ENDP
 
 Resource_loadAll PROC USES eax
 	invoke Resource_load, OFFSET __bgName, OFFSET bgImg
-	invoke Resource_load, OFFSET __slime0, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 0]
-	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 1]
-	invoke Resource_load, OFFSET __slime2, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 2]
+
+	invoke Resource_load, OFFSET __heartEmpty, OFFSET heartEmpty
+	invoke Resource_load, OFFSET __heartFull, OFFSET heartFull
+
+	invoke Resource_load, OFFSET __slime0, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 0) * TYPE DWORD]
+	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 1) * TYPE DWORD]
+	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 2) * TYPE DWORD]
 
 	ret
 Resource_loadAll ENDP
@@ -89,16 +98,27 @@ Resource_getBGImg PROC
 Resource_getBGImg ENDP
 
 Resource_getMobImg PROC USES ebx, mob: Mob
-	mov eax, mob.state
+	mov eax, mob._type
 	mov ebx, _MOB_STATE_SIZE
 	mul ebx
-	add eax, mob._type
+	add eax, mob.state
+	mov ebx, (TYPE DWORD)
+	mul ebx
 
 	mov ebx, eax
 	mov eax, MobImg[ebx]
-	mShow eax
 	ret
 Resource_getMobImg ENDP
+
+Resource_getHeartImg PROC, isFull: DWORD
+	.IF isFull == 1
+		mov eax, heartFull
+	.ELSE
+		mov eax, heartEmpty
+	.ENDIF
+	ret
+Resource_getHeartImg ENDP
+
 
 
 END

@@ -12,13 +12,12 @@ extern Resource_loadAll: PROC
 extern Resource_getBGImg: PROC
 extern Resource_getMobImg: PROTO, :Mob
 
-; extern Slime_update: PROTO, :PTR Mob
-; extern Slime_hert: PROTO, :PTR Mob, :DWORD
-; extern Collision_Check: PROTO, :LPARAM, :Mob
-; extern Life_Sub: PROTO, :DWORD
-; extern DrawScore: PROTO, :HDC
-; extern DrawLife: PROTO, :HDC
-; extern PlotIMG: PROTO, :HDC
+extern Slime_update: PROTO, :PTR Mob
+extern Slime_hert: PROTO, :PTR Mob, :DWORD
+extern Collision_Check: PROTO, :LPARAM, :Mob
+extern Life_Sub: PROTO, :DWORD
+extern DrawScore: PROTO, :DWORD
+extern DrawLife: PROTO, :DWORD
 DrawMob PROTO, :Mob
 
 .data
@@ -99,31 +98,31 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 				; 0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		; mov ecx, 0
-		; mov esi, 0
-		; .WHILE ecx < mobAmount
-		; 	invoke Collision_Check, lParam, mobList[esi]
-		; 	.IF eax == 1 && mobList[esi].state == 3
-		; 		.IF isInvincible == 0
-		; 			invoke Life_Sub, 1
-		; 			mov isInvincible, 1
-		; 		.ENDIF
-		; 	.ENDIF
+		mov ecx, 0
+		mov esi, 0
+		.WHILE ecx < mobAmount
+			invoke Collision_Check, lParam, mobList[esi]
+			.IF eax == 1 && mobList[esi].state == 3
+				.IF isInvincible == 0
+					invoke Life_Sub, 1
+					mov isInvincible, 1
+				.ENDIF
+			.ENDIF
 
-		; 	.IF eax == 1 && mobList[esi].isTouched == 0
-		; 		mov mobList[esi].isTouched, 1
-		; 		invoke Slime_hert, ADDR mobList[esi], 25
-		; 	.ENDIF
+			.IF eax == 1 && mobList[esi].isTouched == 0
+				mov mobList[esi].isTouched, 1
+				invoke Slime_hert, ADDR mobList[esi], 25
+			.ENDIF
 
-		; 	.IF eax == 0 && mobList[esi].isTouched == 1
-		; 		mov mobList[esi].isTouched, 0
-		; 	.ENDIF
-		; 	inc ecx
-		; 	add esi, TYPE Mob
-		; .ENDW
+			.IF eax == 0 && mobList[esi].isTouched == 1
+				mov mobList[esi].isTouched, 0
+			.ENDIF
+			inc ecx
+			add esi, TYPE Mob
+		.ENDW
 		
 	.ELSEIF uMsg == WM_TIMER
-		; call Game_update
+		call Game_update
 		call Game_draw
 		
 		invoke InvalidateRect, hwnd, NULL, TRUE
@@ -153,7 +152,7 @@ Game_Hide ENDP
 Game_draw PROC USES eax
 	call DrawBG
 	call DrawMobs
-	; INVOKE	DrawLife, hdcBuffer
+	INVOKE	DrawLife, mainGraphic
 	; INVOKE 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
@@ -178,35 +177,31 @@ DrawMobs PROC USES ecx esi
 DrawMobs ENDP
 
 DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
-	LOCAL tmpHdc: HDC
-
-	; mShow mob.X
-
 	invoke	Resource_getMobImg, mob
 	mov		ebx, eax
-	mov		eax, 44
+	mov		eax, mob._width
 	mul		mob.AnimationTick
-	invoke	GdipDrawImagePointRectI, mainGraphic, ebx, mob.X, mob.Y, eax, 0, 44, 30, NULL
+	invoke	GdipDrawImagePointRectI, mainGraphic, ebx, mob.X, mob.Y, eax, 0, mob._width, mob._height, UnitPixel
 	ret
 DrawMob ENDP
 
-; Game_update PROC USES ecx esi edx
-; 	mov ecx, mobAmount
-; 	mov esi, 0
+Game_update PROC USES ecx esi edx
+	mov ecx, mobAmount
+	mov esi, 0
 	
-; 	mov edx, isInvincible
-; 	add invincibleTick, edx
-; 	.IF invincibleTick >= 10
-; 		mov isInvincible, 0
-; 		mov invincibleTick, 0
-; 	.ENDIF
+	mov edx, isInvincible
+	add invincibleTick, edx
+	.IF invincibleTick >= 10
+		mov isInvincible, 0
+		mov invincibleTick, 0
+	.ENDIF
 
-; update_mobs_loop:
-; 	invoke Slime_update, ADDR mobList[esi]
-; 	add esi, TYPE Mob
-; 	loop update_mobs_loop
+update_mobs_loop:
+	invoke Slime_update, ADDR mobList[esi]
+	add esi, TYPE Mob
+	loop update_mobs_loop
 
-; 	ret
-; Game_update ENDP
+	ret
+Game_update ENDP
 
 END
