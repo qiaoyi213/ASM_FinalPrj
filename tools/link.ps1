@@ -9,7 +9,8 @@ $LIBRARY_NAME_ARRAY = @(
 	"Kernel32",
 	"User32",
 	"gdi32",
-	"gdiplus"
+	"gdiplus",
+	"WinMM"
 )
 
 # WORKING ZONE #

@@ -4,6 +4,7 @@ INCLUDE Macros.inc
 INCLUDE Reference.inc
 include       gdiplus.inc
 includelib    gdiplus.lib
+includelib WinMM.lib
 extern main_getHInstance: PROC
 
 extern Resource_getMobImgHandle: PROTO, :Mob
@@ -18,7 +19,10 @@ extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
 extern PlotIMG: PROTO, :HDC
+extern battle_bgm_play: PROC
 Game_draw PROTO, :HWND
+
+
 DrawMob PROTO, :Mob
 
 .data
@@ -45,6 +49,8 @@ invincibleTick		DWORD		0
 
 GpInput     		GdiplusStartupInput <1,0,0,0>
 hToken        		dd      	?
+
+
 .code
 
 Game_init PROC
@@ -84,8 +90,9 @@ Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
+		call battle_bgm_play
 		invoke	SetTimer, hwnd, TimerID, 100, NULL
-
+		
 		invoke	GetDC, hwnd
 		mov		hdc, eax
 		invoke	CreateCompatibleDC, eax
@@ -110,9 +117,10 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 				.ENDIF
 			.ENDIF
 
-			.IF eax == 1 && mobList[esi].isTouched == 0
+			.IF eax == 1 && mobList[esi].isTouched == 0 && mobList[esi].state != 4
 				mov mobList[esi].isTouched, 1
 				invoke Slime_hert, ADDR mobList[esi], 25
+				
 			.ENDIF
 
 			.IF eax == 0 && mobList[esi].isTouched == 1
@@ -159,7 +167,6 @@ Game_draw PROC USES eax, hwnd :HWND
 	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
 	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
 	
-
 	call DrawBG
 	call DrawMobs
 

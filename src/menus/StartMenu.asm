@@ -7,7 +7,8 @@ extern main_getHInstance: PROC
 extern GetIndexedStr: PROTO, :DWORD
 extern Game_create: PROTO, :HWND
 extern Game_Show: PROC
-
+extern normal_bgm_play: PROC
+extern normal_bgm_close: PROC
 .data
 
 hInstance				HINSTANCE	?
@@ -25,14 +26,12 @@ BTN_START_TEXT			BYTE		"Start", 0
 
 BTN_EXIT_EXECCODE		HMENU		102
 BTN_EXIT_TEXT			BYTE		"Exit", 0
-
 mainHwnd				HWND		?
 
 .code
 StartMenu_init PROC
 	call	main_getHInstance
 	mov		hInstance, eax
-
 	mov     StartMenuClass.hInstance, eax
 	mov     StartMenuClass.style, NULL
 	mov     StartMenuClass.lpfnWndProc, OFFSET StartMenu_Process
@@ -70,7 +69,9 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 
 	.IF uMsg == WM_CREATE
 		mWriteLn "CREATE MENU"
+		call normal_bgm_play
 		invoke GetIndexedStr, $BUTTON$
+		
 		mov ebx, _WINDOW_WIDTH
 		sub ebx, BTN_WIDTH
 		shr ebx, 1
@@ -92,8 +93,8 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_START_EXECCODE
+			call normal_bgm_close
 			invoke ShowWindow, hwnd, SW_HIDE
-
 			invoke Game_create, mainHwnd
 			call Game_Show
 			mWrite "START GAME"
