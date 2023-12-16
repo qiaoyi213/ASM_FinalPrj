@@ -2,7 +2,8 @@ INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE Reference.inc
-
+include       gdiplus.inc
+includelib    gdiplus.lib
 extern main_getHInstance: PROC
 
 extern Resource_getMobImgHandle: PROTO, :Mob
@@ -160,7 +161,7 @@ Game_draw PROC USES eax, hwnd :HWND
 
 	call DrawBG
 	call DrawMobs
-	
+
 	INVOKE	DrawLife, hdcBuffer
 	INVOKE 	DrawScore, hdcBuffer
 	ret
