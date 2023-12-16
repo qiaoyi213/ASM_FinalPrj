@@ -9,3 +9,4 @@ cursorFile      CURSOR  ".\\assets\\sword knight text select.cur"
 
 HeartFullImg    BITMAP  ".\\assets\\HeartFull.bmp"
 HeartEmptyImg    BITMAP  ".\\assets\\HeartEmpty.bmp"
+

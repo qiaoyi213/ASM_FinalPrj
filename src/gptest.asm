@@ -31,7 +31,8 @@ hToken        dd       ?
                 .const
 szClassName   db       'MyClass',0
 szCaptionMain db       'GDI+!',0
-imgName       db        'image.png', 0
+bgName         DW        "b","g",".","b","m","p",0
+imgName       DW        "i","m","a","g", "e",".","p","n","g",0
 imgBuf         Qword       ?
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ;代码段
@@ -43,12 +44,13 @@ imgBuf         Qword       ?
 _ProcWinMain  proc     uses ebx edi esi,hWnd,uMsg,wParam,lParam
           local    @gdip
           local    @hBrush
+          local     @pict
+          local     @bgct
          local Clror
           mov eax,uMsg
 ;*******************************************************************************************
                .if  eax == WM_CREATE
-                    invoke GdipLoadImageFromFile,offset imgName, offset imgBuf
-                    mShow eax
+                    
               .elseif  eax ==  WM_PAINT
                    mov     ebx,hWnd
                .if  ebx == hWinMain
@@ -56,10 +58,14 @@ _ProcWinMain  proc     uses ebx edi esi,hWnd,uMsg,wParam,lParam
                     ;mov Clror, 064FF0000h
                     ;invoke  GdipCreateSolidFill, Clror ,addr @hBrush
                     ;invoke  GdipFillRectangleI,@gdip,@hBrush,10,10,160,240
-                         
-                    ;invoke GdipLoadImageFromFile, imgName, offset imgBuf
-                    ;invoke GdipGetImageGraphicsContext, 
-                    ;invoke GdipDrawImage,@gdip, offset imgBuf,0,0
+                    
+                    invoke GdipLoadImageFromFile,offset bgName, addr @bgct
+                    
+                    invoke GdipDrawImage,@gdip,@bgct,0,0
+
+                    invoke GdipLoadImageFromFile,offset imgName, addr @pict
+                    
+                    invoke GdipDrawImage,@gdip,@pict,0,0
                     
                     invoke  GdipDeleteBrush,@hBrush
                     invoke  GdipDeleteGraphics,@gdip
