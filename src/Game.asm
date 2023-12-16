@@ -8,8 +8,9 @@ extern main_getHInstance: PROC
 
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
-extern Resource_loadAll: PROTO
+extern Resource_loadAll: PROC
 extern Resource_getBGImg: PROC
+extern Resource_getMobImg: PROTO, :Mob
 
 ; extern Slime_update: PROTO, :PTR Mob
 ; extern Slime_hert: PROTO, :PTR Mob, :DWORD
@@ -93,7 +94,7 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		mov 	mobAmount, ecx
 
 	.ELSEIF uMsg == WM_PAINT
-		mWriteLn "paint"
+		; mWriteLn "paint"
 		; invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
 				; 0, 0, SRCCOPY
 	
@@ -179,26 +180,13 @@ DrawMobs ENDP
 DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	LOCAL tmpHdc: HDC
 
-	; invoke 	CreateCompatibleDC, hdcBuffer
-	; mov		tmpHdc, eax
-	; invoke  Resource_getMobImgHandle, mob
-	; invoke  SelectObject, tmpHdc, eax
+	; mShow mob.X
 
-	; invoke	Resource_getMobImg, mob
+	invoke	Resource_getMobImg, mob
 	mov		ebx, eax
 	mov		eax, 44
 	mul		mob.AnimationTick
 	invoke	GdipDrawImagePointRectI, mainGraphic, ebx, mob.X, mob.Y, eax, 0, 44, 30, NULL
-
-
-
-	; mov		eax, 44
-	; mul		mob.AnimationTick
-
-	; invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
-	; 		eax, 0, SRCCOPY
-	
-	; invoke  DeleteDC, tmpHdc
 	ret
 DrawMob ENDP
 

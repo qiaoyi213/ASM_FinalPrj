@@ -13,17 +13,18 @@ Resource_load PROTO, :PTR BYTE, :PTR PTR GpImage
 	GpInput			GdiplusStartupInput <1, 0, 0, 0>
 	hToken			DWORD				?
 	
-	WideNameBuf		WORD		32 DUP(0)
-	__PNG			WORD		"P","N","G",0
+	WideNameBuf		WORD		64 DUP(0)
+	NameBuf			BYTE		64 DUP(0)
+	__resource		BYTE		"resources/", 0
+	__PNG			BYTE		".png", 0
 
-	bgName			BYTE		"BGImg", 0
 	bgImg			DWORD		?
+	__bgName		BYTE		"bg", 0
 
-	MobImgHandle	HBITMAP		(_MOB_STATE_SIZE * _MOB_ID_SIZE) DUP (?)
-	__Slime0		BYTE 		"Slime0", 0
-	__Slime1		BYTE		"Slime1", 0
-	__Slime2		BYTE		"Slime2", 0
-	__Slime3		BYTE		"Slime3", 0
+	MobImg			DWORD		(_MOB_STATE_SIZE * _MOB_ID_SIZE) DUP (0)
+	__slime0		BYTE 		"slime0", 0
+	__slime1		BYTE		"slime1", 0
+	__slime2		BYTE		"slime2", 0
 
 
 .code
@@ -41,16 +42,25 @@ Resource_cleanUp PROC
 Resource_cleanUp ENDP
 
 Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR PTR GpImage
-	LOCAL hInstance:	HINSTANCE
-	LOCAL hrsrc:		HRSRC
-	LOCAL resSize:		DWORD
-	LOCAL hGlobalRes:	HGLOBAL
+format_directory:
+	mov esi, OFFSET __resource
+	mov edi, OFFSET NameBuf
+	mov ecx, LENGTHOF __resource
+	rep movsb
 
-	LOCAL imgBytesPtr:	DWORD
-	LOCAL hGlobal:		HGLOBAL
-	LOCAL bufferPtr:	DWORD
-
+	dec edi
 	mov esi, name
+	mov edx, name
+	call StrLength
+	mov ecx, eax
+	rep movsb
+
+	; dec edi				won't need since StrLength don't count NULL
+	mov esi, OFFSET __PNG
+	mov ecx, LENGTHOF __PNG
+	rep movsb
+move_into_WideBuffer:
+	mov esi, OFFSET NameBuf
 	mov edi, OFFSET WideNameBuf
 	.WHILE 1
 		mov al, BYTE PTR [esi]
@@ -59,32 +69,17 @@ Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR PTR
 		add edi, TYPE WORD
 		.BREAK .IF al == 0
 	.ENDW
-
-	; call main_getHInstance
-	; mov hInstance, eax
-
-	; invoke FindResourceW, hInstance, OFFSET WideNameBuf, OFFSET __PNG
-	; mov hrsrc, eax
-
-	; invoke SizeofResource, hInstance, hrsrc
-	; mov resSize, eax
-
-	; invoke LoadResource, hInstance, hrsrc
-	; mov hGlobalRes, eax
-
-	; invoke LockResource, hGlobalRes
-	; mov imgBytesPtr, eax
-
-	; invoke GlobalAlloc
-
-	
-
+loader:
 	invoke GdipLoadImageFromFile, OFFSET WideNameBuf, imgPtr
 	ret
 Resource_load ENDP
 
 Resource_loadAll PROC USES eax
-	invoke Resource_load, OFFSET bgName, ADDR bgImg
+	invoke Resource_load, OFFSET __bgName, OFFSET bgImg
+	invoke Resource_load, OFFSET __slime0, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 0]
+	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 1]
+	invoke Resource_load, OFFSET __slime2, OFFSET MobImg[_MOB_SLIME_ID + _MOB_STATE_SIZE * 2]
+
 	ret
 Resource_loadAll ENDP
 
@@ -93,19 +88,6 @@ Resource_getBGImg PROC
 	ret
 Resource_getBGImg ENDP
 
-
-Resource_getMobImgHandle PROC USES ebx, mob: Mob
-	mov eax, mob.state
-	mov ebx, _MOB_STATE_SIZE
-	mul ebx
-	add eax, mob._type
-
-	mov ebx, eax
-	mov eax, MobImgHandle[ebx]
-	; mShow eax
-	ret
-Resource_getMobImgHandle ENDP
-
 Resource_getMobImg PROC USES ebx, mob: Mob
 	mov eax, mob.state
 	mov ebx, _MOB_STATE_SIZE
@@ -113,7 +95,8 @@ Resource_getMobImg PROC USES ebx, mob: Mob
 	add eax, mob._type
 
 	mov ebx, eax
-	mov eax, MobImgHandle[ebx]
+	mov eax, MobImg[ebx]
+	mShow eax
 	ret
 Resource_getMobImg ENDP
 
