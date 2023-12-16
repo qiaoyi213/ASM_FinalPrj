@@ -1,24 +1,11 @@
-        .386
-        .model flat,stdcall
-        option casemap:none
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ;include文件定义
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-include       windows.inc
-; include       GDI32.inc
-
-include       gdiplus.inc
 INCLUDE Ervine32.inc
-INCLUDE WinUser.inc
+INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
-include       Reference.inc
-
-includelib    gdiplus.lib
-
-includelib    gdi32.lib
-includelib    User32.Lib
-includelib    Kernel32.Lib
-
+INCLUDE gdiplus.inc
+include Reference.inc
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 ;数据段
 ;>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -67,7 +54,7 @@ _ProcWinMain  proc     uses ebx edi esi,hWnd,uMsg,wParam,lParam
                     
                     invoke GdipDrawImage,@gdip,@pict,0,0
                     
-                    invoke  GdipDeleteBrush,@hBrush
+                    ; invoke  GdipDeleteBrush,@hBrush
                     invoke  GdipDeleteGraphics,@gdip
                .endif
 ;********************************************************************************************
