@@ -85,21 +85,9 @@ Window_handleMsg ENDP
 Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.IF uMsg == WM_CREATE
 		invoke Resource_loadAll, hInstance
-		
+
 		invoke StartMenu_create, hwnd
 
-	.ELSEIF uMsg == WM_MOUSEMOVE
-		invoke Window_MouseMove, lParam
-
-	.ELSEIF uMsg == WM_PAINT
-		invoke Window_Paint, hwnd
-
-	.ELSEIF uMsg == WM_SETCURSOR
-		mov eax, lParam
-		.IF ax == HTCLIENT
-			invoke SetCursor, hCursor
-			ret
-		.ENDIF
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
@@ -111,38 +99,5 @@ msg_process:
 
 	ret
 Window_Process ENDP
-
-Window_Paint PROC, hwnd: HWND
-	LOCAL   hdc: HDC
-	LOCAL	hdcMem: HDC
-	LOCAL   ps: PAINTSTRUCT
-
-	invoke  BeginPaint, hwnd, ADDR ps
-	mov     hdc, eax
-	invoke  CreateCompatibleDC, eax  ;110 建立相同的設備內容作為來源
-	mov     hdcMem, eax
-
-	; invoke  SelectObject, hdcMem, hBitmap     ;112 選定來源設備內容的位元圖
-	; mov     eax, 0
-	; mov     ecx, 0
-	; invoke  BitBlt,hdc,0,0,8,8,hdcMem,\
-	; 		ecx,eax,SRCCOPY         ;118 傳送位元圖到視窗的設備內容
-
-
-	invoke  DeleteDC, hdcMem         ;119 釋放來源設備內容
-	invoke  EndPaint, hwnd, ADDR ps   ;120 釋放視窗設備內容
-	ret
-Window_Paint ENDP
-
-Window_MouseMove PROC, lParam: LPARAM
-	mov eax, lParam
-	and eax, 0ffffh
-	mov mouseX, eax
-	mov eax, lParam
-	shr eax, 10h
-	mov mouseY, eax
-
-	ret
-Window_MouseMove ENDP
 
 END
