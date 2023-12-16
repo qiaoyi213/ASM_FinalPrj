@@ -150,7 +150,6 @@ Game_draw PROC USES eax, hwnd :HWND
 	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
 	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
 	
-	invoke PlotIMG, hdcBuffer
 
 	call DrawBG
 	call DrawMobs
