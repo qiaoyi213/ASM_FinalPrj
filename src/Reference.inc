@@ -16,7 +16,7 @@ _MOB_MUSHROOM_ID	= 2
 _MOB_ID_SIZE		= 3
 _MOB_STATE_SIZE		= 4
 
-_MOB_LIST_MAX_SIZE	= 5
+_MOB_LIST_MAX_SIZE	= 50
 
 
 ; ---------
@@ -33,6 +33,8 @@ Mob STRUCT
 
 	X				DWORD		?
 	Y				DWORD		?
+	_width			DWORD		?
+	_height			DWORD		?
 
 	HP				DWORD		?
 
@@ -41,8 +43,7 @@ Mob STRUCT
 	AttackTick		DWORD		?
 	AttackEdge		DWORD		?
 	
-	InvincibleTick	DWORD		?
-	Invincible		DWORD		?
+	isTouched		DWORD		?
 	
 Mob ENDS
 

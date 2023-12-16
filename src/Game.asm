@@ -26,10 +26,9 @@ Level	            BYTE		0
 Life				WORD		5
 
 mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
-mobAmount			DWORD		5
+mobAmount			DWORD		0
 
 TimerID				EQU			74
-t					DWORD		0
 
 hInstance			HINSTANCE	?
 GameClassName		BYTE		"GamePane", 0
@@ -39,6 +38,10 @@ game_hwnd			HWND		?
 
 hdc					HDC			?
 hdcBuffer			HDC			?
+
+
+isInvincible		DWORD		0
+invincibleTick		DWORD		0
 
 GpInput     		GdiplusStartupInput <1,0,0,0>
 hToken        		dd      	?
@@ -72,9 +75,10 @@ Game_create PROC, main_hwnd: HWND
 
     invoke  ShowWindow, game_hwnd, SW_HIDE
 	invoke  UpdateWindow, game_hwnd
+
+	call Randomize
     
 	mov eax, game_hwnd
-
     ret
 Game_create ENDP
 
@@ -95,31 +99,28 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 				0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		; Detect mouse and attack
-		; invoke Detect_Collision, lParam
-		; mWriteLn "MOVE"
-		mov ecx, 5
+		mov ecx, 0
 		mov esi, 0
-		__detect_state_loop:
+		.WHILE ecx < mobAmount
 			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1
-				.IF mobList[esi].state == 3
-					mov mobList[esi].state, 1
+			.IF eax == 1 && mobList[esi].state == 3
+				.IF isInvincible == 0
 					invoke Life_Sub, 1
-					jmp _mid_2
-					_mid_1:
-						jmp __detect_state_loop
-					_mid_2:
-				.ELSEIF mobList[esi].Invincible == 0
-					mShow mobList[esi].Invincible
-					mov mobList[esi].Invincible, 1
-					invoke Slime_hert, ADDR mobList[esi], 25
-					mov mobList[esi].state, 1
-					
+					mov isInvincible, 1
 				.ENDIF
 			.ENDIF
+
+			.IF eax == 1 && mobList[esi].isTouched == 0
+				mov mobList[esi].isTouched, 1
+				invoke Slime_hert, ADDR mobList[esi], 25
+			.ENDIF
+
+			.IF eax == 0 && mobList[esi].isTouched == 1
+				mov mobList[esi].isTouched, 0
+			.ENDIF
+			inc ecx
 			add esi, TYPE Mob
-		loop _mid_1
+		.ENDW
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
@@ -176,13 +177,14 @@ DrawBG PROC USES eax
 DrawBG ENDP
 
 DrawMobs PROC USES ecx esi
-	mov ecx, mobAmount
-	mov esi, 0
+	mov ecx, 0
+	lea esi, mobList
 
-draw_mobs_loop:
-	add esi, TYPE Mob
-	invoke DrawMob, mobList[esi]
-	loop draw_mobs_loop
+	.WHILE ecx < mobAmount
+		invoke DrawMob, Mob PTR [esi]
+		add esi, TYPE Mob
+		inc ecx
+	.ENDW
 
 	ret
 DrawMobs ENDP
@@ -195,7 +197,7 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	invoke  Resource_getMobImgHandle, mob
 	invoke  SelectObject, tmpHdc, eax
 
-	
+
 
 	mov		eax, 44
 	mul		mob.AnimationTick
@@ -210,6 +212,13 @@ DrawMob ENDP
 Game_update PROC USES ecx esi edx
 	mov ecx, mobAmount
 	mov esi, 0
+	
+	mov edx, isInvincible
+	add invincibleTick, edx
+	.IF invincibleTick >= 10
+		mov isInvincible, 0
+		mov invincibleTick, 0
+	.ENDIF
 
 update_mobs_loop:
 	invoke Slime_update, ADDR mobList[esi]
