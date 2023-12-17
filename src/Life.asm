@@ -1,10 +1,12 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 INCLUDE Reference.inc
 
+extern Resource_getHeartImg: PROTO, :DWORD
 
-extern Resource_getHeartImgHandle: PROTO, :DWORD
+extern player_hit_play: PROC
 .data
 Life    DWORD    5
 .code 
@@ -12,6 +14,7 @@ Life    DWORD    5
 Life_Sub PROC USES edx, num: DWORD
     mov edx, num
     sub Life, edx
+    call player_hit_play
     mShow Life
     ret
 Life_Sub ENDP
@@ -28,32 +31,32 @@ Life_Change PROC USES edx, num: DWORD
     ret
 Life_Change ENDP
 
-DrawLife PROC USES ecx edx, hdcBuffer: HDC
-	LOCAL tmpHdc: HDC
-    
-	
-    invoke 	CreateCompatibleDC, hdcBuffer
-	mov		tmpHdc, eax
-	invoke	Resource_getHeartImgHandle, 1
-	invoke  SelectObject, tmpHdc, eax
+DrawLife PROC USES ebx ecx edx, mainGraphic: DWORD
+	LOCAL HF: DWORD
+	LOCAL HE: DWORD
 
-    ; mShow eax
-    mov edx, 0
-    mov ecx, Life
-draw_life_loop:
-    push ecx
-    push edx
-    
-	invoke  BitBlt, hdcBuffer, edx, 0, 36, 32, tmpHdc,\
-			0, 0, SRCCOPY
+	invoke Resource_getHeartImg, 1
+	mov HF, eax
+	invoke Resource_getHeartImg, 0
+	mov HE, eax
 
-    pop edx
-    pop ecx
-    add edx,36
-    loop draw_life_loop
-	
-    
-	invoke  DeleteDC, tmpHdc
+	mov ecx, 0
+	mov edx, 0
+	.WHILE ecx < 5
+		.IF ecx < Life
+			mov ebx, HF
+		.ELSE
+			mov ebx, HE
+		.ENDIF
+
+		push ecx
+		push edx
+		invoke	GdipDrawImagePointRectI, mainGraphic, ebx, edx, 0, 0, 0, 36, 32, UnitPixel
+		pop edx
+		pop ecx
+		add edx, 36
+		inc ecx
+	.ENDW
     ret
 DrawLife ENDP
 

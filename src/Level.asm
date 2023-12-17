@@ -3,58 +3,53 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE Reference.inc
 
-extern Slime_Build: PROTO, :PTR Mob
-
-Mob_init PROTO, :PTR Mob, :DWORD, :DWORD, :DWORD, :DWORD
+extern Mob_spawn: PROTO, :DWORD, :PTR Mob
 
 .data
+
+mobLevel1		DWORD		20, -1
+mobLevel2		DWORD		30, -1
+; mobLevel3		DWORD		5, 5, -1
+
+mobWaveList		DWORD		OFFSET mobLevel1, OFFSET mobLevel2		;, OFFSET mobLevel3
 
 .code
 
 
-Level_Load PROC USES esi eax, level: DWORD, Mobs: PTR Mob
+Level_Load PROC USES eax ebx edx esi edi, level: DWORD, mobListPtr: PTR Mob
+	LOCAL mobAmount: DWORD
+	
+	mov mobAmount, 0
 
-    
-    .IF level == 1
-        mWriteLn "Load Level"
+	; eax = (level - 1) * 4
+	mov edx, level
+	dec edx
+	mov eax, TYPE DWORD
+	mul edx
 
-        mov ecx, 5
-        
-        mov esi, Mobs
+	mov esi, mobWaveList[eax]
 
-        invoke Mob_init, esi, _MOB_SLIME_ID, 640, 360, 100
-        add esi, TYPE Mob
+	mov ebx, 0	; mob type
+	mov edi, mobListPtr
 
-        invoke Mob_init, esi, _MOB_SLIME_ID, 740, 360, 100
-        add esi, TYPE Mob
-        
-        
-        invoke Mob_init, esi, _MOB_SLIME_ID, 540, 360, 100
-        add esi, TYPE Mob
-        
-        invoke Mob_init, esi, _MOB_SLIME_ID, 640, 260, 100
-        add esi, TYPE Mob
+	.WHILE 1
+		mov eax, DWORD PTR [esi]
 
-        
-        invoke Mob_init, esi, _MOB_SLIME_ID, 640, 460, 100
+		.BREAK .IF eax == -1
+		
+		add mobAmount, eax
+		.REPEAT
+			invoke Mob_spawn, ebx, edi
+			add edi, TYPE Mob
+			dec eax
+		.UNTIL eax <= 0
 
-        
-    .ENDIF
+		inc ebx
+		add esi, TYPE DWORD
+	.ENDW
 
-    ret
+	mov ecx, mobAmount	; return mobAmount
+	ret
 Level_Load ENDP
-
-
-Mob_init PROC USES esi eax, mob: PTR Mob, id: DWORD, X: DWORD, Y:DWORD, HP:DWORD
-
-	mov esi, mob
-    invoke Slime_Build, esi
-
-	mov eax, X
-	mov (Mob PTR [esi]).X, eax
-	mov eax, Y
-	mov (Mob PTR [esi]).Y, eax
-    ret
-Mob_init ENDP
 
 END
