@@ -86,17 +86,11 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
 		invoke GetDC, hwnd
 		mov hdc, eax
 		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
-
-		invoke	CreateCompatibleDC, hdc
-		mov		hdcBuffer, eax
-		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
-		mov		hbitmap, eax
-		invoke	SelectObject, hdcBuffer, hbitmap
-		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
-
-	.ELSEIF uMsg == WM_PAINT
 		call	Victory_draw
-		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
+		
+	.ELSEIF uMsg == WM_PAINT
+		
+		; invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_BACK_EXECCODE
@@ -126,7 +120,7 @@ Victory_Show PROC
 	call victory_bgm_play
     invoke ShowWindow, Victory_hwnd, SW_SHOW
     invoke UpdateWindow, Victory_hwnd
-	 
+	
     ret
 Victory_Show ENDP
 
@@ -139,7 +133,8 @@ Victory_Hide ENDP
 
 Victory_draw PROC
 	call Resource_getVictory
-	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, 640, 400
+	mShow mainGraphic
+	invoke	GdipDrawImageRectI, mainGraphic, eax, 0, 0, 640, 400
 	ret
 Victory_draw ENDP
 END
