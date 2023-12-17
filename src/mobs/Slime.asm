@@ -3,13 +3,13 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE ../Reference.inc
 
+extern GetIndexedStr: PROTO, :PTR BYTE
 extern Score_Add :PROTO, :DWORD
 extern slime_hit_play: PROC
 extern slime_dead_play: PROC
 .data
 	AttackEdge		DWORD	50
-	AnimationEdges	DWORD	10, 5, 10, 10
-	
+	AnimationEdges	DWORD	10, 5, 10, 20
 .code
 
 Slime_Build PROC USES eax esi, mptr: PTR Mob
@@ -107,21 +107,22 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	ret	
 Slime_update ENDP
 
-Slime_hert PROC USES eax esi, mptr: PTR Mob, MATK: DWORD
+Slime_hurt PROC USES esi, mptr: PTR Mob, MATK: DWORD
 	mov esi, mptr
 	mov eax, (Mob PTR [esi]).HP
 	sub eax, MATK
 
 	mov (Mob PTR [esi]).HP, eax
-	mShow (Mob PTR [esi]).HP
+	mov eax, 0
 	call slime_hit_play
 	.IF (Mob PTR [esi]).HP <= 0
 		mov (Mob PTR [esi]).state, _MOB_STATE_SIZE
 		invoke Score_Add, 100
 		call slime_dead_play
 		mWriteLn "DEAD"
+		mov eax, 1
 	.ENDIF
 
 	ret
-Slime_hert ENDP
+Slime_hurt ENDP
 END

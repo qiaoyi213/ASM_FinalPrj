@@ -3,11 +3,8 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE gdiplus.inc
 INCLUDE Reference.inc
-include       gdiplus.inc
-includelib    gdiplus.lib
-includelib WinMM.lib
-extern main_getHInstance: PROC
 
+extern main_getHInstance: PROC
 extern Level_Load: PROTO, :DWORD, :PTR Mob
 
 extern Resource_loadAll: PROC
@@ -15,13 +12,15 @@ extern Resource_getBGImg: PROC
 extern Resource_getMobImg: PROTO, :Mob
 
 extern Slime_update: PROTO, :PTR Mob
-extern Slime_hert: PROTO, :PTR Mob, :DWORD
+extern Slime_hurt: PROTO, :PTR Mob, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
 extern battle_bgm_play: PROC
+
 DrawMob PROTO, :Mob
+Game_mousemove PROTO, :LPARAM
 
 .data
 Level	            BYTE		0
@@ -29,6 +28,7 @@ Life				WORD		5
 
 mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
 mobAmount			DWORD		0
+levelKilled			DWORD		0
 
 TimerID				EQU			74
 
@@ -109,29 +109,7 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
-		mov ecx, 0
-		mov esi, 0
-		.WHILE ecx < mobAmount
-			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1 && mobList[esi].state == 2
-				.IF isInvincible == 0
-					invoke Life_Sub, 1
-					mov isInvincible, 1
-				.ENDIF
-			.ENDIF
-
-			.IF eax == 1 && mobList[esi].isTouched == 0 && mobList[esi].state != 4
-				mov mobList[esi].isTouched, 1
-				invoke Slime_hert, ADDR mobList[esi], 25
-				
-			.ENDIF
-
-			.IF eax == 0 && mobList[esi].isTouched == 1
-				mov mobList[esi].isTouched, 0
-			.ENDIF
-			inc ecx
-			add esi, TYPE Mob
-		.ENDW
+		invoke Game_mousemove, lParam
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
@@ -216,5 +194,35 @@ update_mobs_loop:
 
 	ret
 Game_update ENDP
+
+Game_mousemove PROC USES eax ecx edx esi edi, lParam: LPARAM
+	LOCAL isTouched: DWORD
+	mov ecx, 0
+	mov esi, 0
+	.WHILE ecx < mobAmount
+		mov isTouched, 0
+		invoke Collision_Check, lParam, mobList[esi]
+		mov isTouched, eax
+		.IF isTouched == 1 && mobList[esi].state == 2
+			.IF isInvincible == 0
+				invoke Life_Sub, 1
+				mov isInvincible, 1
+			.ENDIF
+		.ENDIF
+
+		.IF isTouched == 1 && mobList[esi].isTouched == 0 && mobList[esi].state <= 1
+			mov mobList[esi].isTouched, 1
+			invoke Slime_hurt, ADDR mobList[esi], 25
+			add levelKilled, eax
+		.ENDIF
+
+		.IF isTouched == 0 && mobList[esi].isTouched == 1
+			mov mobList[esi].isTouched, 0
+		.ENDIF
+		inc ecx
+		add esi, TYPE Mob
+	.ENDW
+	ret
+Game_mousemove ENDP
 
 END

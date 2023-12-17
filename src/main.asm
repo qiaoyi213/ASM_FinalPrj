@@ -28,19 +28,18 @@ extern Read_all_sound: PROC
 .code
 
 main PROC
-	call Boot
+	call	Boot
 	invoke	GdiplusStartup, offset hToken, offset GpInput, NULL
-	call Window_init
- 	call StartMenu_init
-	call Game_init
+	call	Read_all_sound
+	call	Window_init
+ 	call	StartMenu_init
+	call	Game_init
 	
 
-	call Window_create	
-	call Window_handleMsg
+	call	Window_create	
+	call	Window_handleMsg
 
-	invoke	GdiplusShutdown, hToken
-	invoke  ExitProcess, eax
-
+	call	main_stop
 	ret
 main ENDP
 
@@ -60,6 +59,12 @@ main_getState PROC
 	mov eax, State
 	ret
 main_getState ENDP
+
+main_stop PROC
+	invoke	GdiplusShutdown, hToken
+	invoke  ExitProcess, hInstance
+	ret
+main_stop ENDP
 
 
 END main
