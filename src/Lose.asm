@@ -7,8 +7,8 @@ INCLUDE Reference.inc
 extern main_getHInstance: PROC
 extern StartMenu_create: PROTO, :HWND
 extern GetIndexedStr: PROTO, :DWORD
-
-
+extern lose_bgm_play: PROC
+extern lose_bgm_stop: PROC
 DrawMob PROTO, :Mob
 
 
@@ -69,8 +69,8 @@ Lose_create ENDP
 
 Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
-		; call normal_bgm_play
         mWriteLn "YOU LOSE"
+		
 		invoke GetIndexedStr, $BUTTON$
 		
 		mov ebx, _WINDOW_WIDTH
@@ -87,6 +87,7 @@ Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		.IF eax == BTN_BACK_EXECCODE
 			invoke StartMenu_create, mainHwnd
 			mWriteLn "BACK"
+			call lose_bgm_stop
             invoke DestroyWindow, hwnd
 		; .ELSEIF eax == BTN_EXIT_EXECCODE
 		; 	mWriteLn "EXIT GAME"
@@ -109,12 +110,14 @@ Lose_Process ENDP
 
 
 Lose_Show PROC
+	call lose_bgm_play
     invoke ShowWindow, Lose_hwnd, SW_SHOW
     invoke UpdateWindow, Lose_hwnd
     ret
 Lose_Show ENDP
 
 Lose_Hide PROC
+	call lose_bgm_stop
     invoke ShowWindow, Lose_hwnd, SW_HIDE
     invoke UpdateWindow, Lose_hwnd
     ret

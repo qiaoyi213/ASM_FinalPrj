@@ -7,8 +7,8 @@ INCLUDE Reference.inc
 extern main_getHInstance: PROC
 extern StartMenu_create: PROTO, :HWND
 extern GetIndexedStr: PROTO, :DWORD
-
-
+extern victory_bgm_play: PROC
+extern victory_bgm_stop: PROC
 DrawMob PROTO, :Mob
 
 
@@ -69,7 +69,7 @@ Victory_create ENDP
 
 Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
-		; call normal_bgm_play
+		
         mWriteLn "VICTORY"
 		invoke GetIndexedStr, $BUTTON$
 		
@@ -107,14 +107,16 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
     ret
 Victory_Process ENDP
 
-
 Victory_Show PROC
+	call victory_bgm_play
     invoke ShowWindow, Victory_hwnd, SW_SHOW
     invoke UpdateWindow, Victory_hwnd
+	 
     ret
 Victory_Show ENDP
 
 Victory_Hide PROC
+	call victory_bgm_stop
     invoke ShowWindow, Victory_hwnd, SW_HIDE
     invoke UpdateWindow, Victory_hwnd
     ret

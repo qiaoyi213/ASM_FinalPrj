@@ -27,13 +27,13 @@ CLOSE_SLIME_DEAD    BYTE    "close slimeDead", 0
 PLAY_PLAYER_HIT     BYTE    "play .\\resources\\assets\\player_hit.wav", 0
 CLOSE_PLAYER_HIT    BYTE    "close playerHit", 0
 
-; OPEN_VICTORY_BGM    BYTE    "", 0
-; PLAY_VICTORY_BGM    BYTE    "", 0
-; CLOSE_VICTORY_BGM   BYTE    "", 0
+OPEN_VICTORY_BGM    BYTE    "open .\\resources\\assets\\victory.wav alias victoryBGM", 0
+PLAY_VICTORY_BGM    BYTE    "play victoryBGM", 0
+CLOSE_VICTORY_BGM   BYTE    "close victoryBGM", 0
 
-; OPEN_LOSE_BGM       BYTE    "", 0
-; PLAY_LOSE_BGM       BYTE    "", 0
-; CLOSE_LOSE_BGM      BYTE    "", 0
+OPEN_LOSE_BGM       BYTE    "open .\\resources\\assets\\lose.wav alias loseBGM", 0
+PLAY_LOSE_BGM       BYTE    "play loseBGM", 0
+CLOSE_LOSE_BGM      BYTE    "close loseBGM", 0
 
 
 .code
@@ -87,4 +87,28 @@ player_hit_play PROC
     invoke mciSendString, OFFSET PLAY_PLAYER_HIT, NULL, 0, NULL
     ret
 player_hit_play ENDP
+
+victory_bgm_play PROC
+    invoke mciSendString, OFFSET OPEN_VICTORY_BGM, NULL, 0, NULL
+    invoke mciSendString, OFFSET PLAY_VICTORY_BGM, NULL, 0, NULL
+    ret
+victory_bgm_play ENDP
+
+victory_bgm_stop PROC
+
+    invoke mciSendString, OFFSET CLOSE_VICTORY_BGM, NULL, 0, NULL
+    ret
+victory_bgm_stop ENDP
+
+lose_bgm_play PROC
+    invoke mciSendString, OFFSET OPEN_LOSE_BGM, NULL, 0, NULL
+    invoke mciSendString, OFFSET PLAY_LOSE_BGM, NULL, 0, NULL
+    ret
+lose_bgm_play ENDP
+
+lose_bgm_stop PROC
+    invoke mciSendString, OFFSET CLOSE_LOSE_BGM, NULL, 0, NULL
+    ret
+lose_bgm_stop ENDP
+
 END

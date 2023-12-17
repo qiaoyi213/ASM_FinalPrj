@@ -25,6 +25,7 @@ extern Score_Change: PROTO, :DWORD
 extern Life_Get: PROC
 extern Pause_Show: PROC
 
+extern normal_bgm_close: PROC
 DrawMob PROTO, :Mob
 Game_mousemove PROTO, :LPARAM
 
@@ -159,7 +160,9 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
     ret
 Game_Process ENDP
 
+
 Game_Show PROC
+	call normal_bgm_close
 	call	battle_bgm_play
 	invoke 	SetFocus, game_hwnd
 	invoke	SetTimer, game_hwnd, TimerID, 100, NULL

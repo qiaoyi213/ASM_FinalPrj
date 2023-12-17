@@ -10,6 +10,9 @@ extern Game_create: PROTO, :HWND
 extern Game_Show: PROC
 extern game_destory: PROC
 extern GetIndexedStr: PROTO, :DWORD
+extern battle_bgm_close: PROC
+extern normal_bgm_play: PROC
+extern battle_bgm_play: PROC
 
 Pause_create PROTO, :HWND
 
@@ -115,6 +118,8 @@ Pause_Process ENDP
 
 
 Pause_Show PROC
+	call battle_bgm_close
+	call normal_bgm_play
 	mWriteLn "in here"
     invoke ShowWindow, pmHwnd, SW_SHOW
     invoke UpdateWindow, pmHwnd
@@ -122,6 +127,7 @@ Pause_Show PROC
 Pause_Show ENDP
 
 Pause_Hide PROC
+	
     invoke ShowWindow, pmHwnd, SW_HIDE
     invoke UpdateWindow, pmHwnd
     ret
