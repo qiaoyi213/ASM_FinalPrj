@@ -14,7 +14,6 @@ extern Game_init: PROC
 extern Resource_init: PROC
 extern Resource_cleanUp: PROC
 
-extern Read_all_sound: PROC
 .data
 	hInstance	HINSTANCE	?
 	
@@ -30,7 +29,7 @@ extern Read_all_sound: PROC
 main PROC
 	call	Boot
 	invoke	GdiplusStartup, offset hToken, offset GpInput, NULL
-	call	Read_all_sound
+
 	call	Window_init
  	call	StartMenu_init
 	call	Game_init

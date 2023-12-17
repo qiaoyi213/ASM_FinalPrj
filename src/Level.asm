@@ -7,11 +7,11 @@ extern Mob_spawn: PROTO, :DWORD, :PTR Mob
 
 .data
 
-mobLevel1		DWORD		5, -1
-mobLevel2		DWORD		10, -1
-mobLevel3		DWORD		5, 5, -1
+mobLevel1		DWORD		20, -1
+mobLevel2		DWORD		30, -1
+; mobLevel3		DWORD		5, 5, -1
 
-mobWaveList		DWORD		OFFSET mobLevel1, OFFSET mobLevel2, OFFSET mobLevel3
+mobWaveList		DWORD		OFFSET mobLevel1, OFFSET mobLevel2		;, OFFSET mobLevel3
 
 .code
 

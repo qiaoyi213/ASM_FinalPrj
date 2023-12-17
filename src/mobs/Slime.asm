@@ -7,6 +7,9 @@ extern GetIndexedStr: PROTO, :PTR BYTE
 extern Score_Add :PROTO, :DWORD
 extern slime_hit_play: PROC
 extern slime_dead_play: PROC
+extern slime_hit_close: PROC
+extern slime_dead_close: PROC
+
 .data
 	AttackEdge		DWORD	50
 	AnimationEdges	DWORD	10, 5, 10, 20
@@ -114,10 +117,12 @@ Slime_hurt PROC USES esi, mptr: PTR Mob, MATK: DWORD
 
 	mov (Mob PTR [esi]).HP, eax
 	mov eax, 0
+	call slime_hit_close
 	call slime_hit_play
 	.IF (Mob PTR [esi]).HP <= 0
 		mov (Mob PTR [esi]).state, _MOB_STATE_SIZE
 		invoke Score_Add, 100
+		call slime_dead_close
 		call slime_dead_play
 		mWriteLn "DEAD"
 		mov eax, 1
