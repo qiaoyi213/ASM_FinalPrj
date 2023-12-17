@@ -5,38 +5,38 @@ INCLUDE gdiplus.inc
 INCLUDE ../Reference.inc
 
 extern main_getHInstance: PROC
-extern StartMenu_create: PROTO, :HWND
+extern main_stop: PROC
+extern Game_create: PROTO, :HWND
+extern Game_Show: PROC
 extern game_destory: PROC
 extern GetIndexedStr: PROTO, :DWORD
 
+Pause_create PROTO, :HWND
+
 .data
 
-hInstance			HINSTANCE	?
-PauseClassName	    BYTE		"PausePane", 0
-PauseClass		    WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET PauseClassName,?>
-PauseTitle		    BYTE		"Pause", 0
-Pause_hwnd		    HWND		?
-BTN_WIDTH			DWORD		400
-BTN_HEIGHT			DWORD		60
-hdc					HDC			?
-hdcBuffer			HDC			?
-hbitmap				HBITMAP		?
-mainGraphic			DWORD		?	; PTR GpGraphics
-bufferGraphic		DWORD		?
+hInstance				HINSTANCE	?
 
-BTN_MENU_EXECCODE   HMENU       103
-BTN_MENU_TEXT       BYTE        "Back to Menu", 0
+PauseClassName		BYTE		"PausePane", 0
+PauseClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET PauseClassName,?>
 
-BTN_BACK_EXECCODE   HMENU       104
-BTN_BACK_TEXT       BYTE        "Back to Game", 0
+PauseTitle			BYTE		"Pause Menu", 0
 
+BTN_WIDTH				DWORD		400
+BTN_HEIGHT				DWORD		60
 
-mainHwnd            HWND        ?
+BTN_CONTINUE_EXECCODE	HMENU		111
+BTN_CONTINUE_TEXT		BYTE		"Continue", 0
+
+BTN_QUIT_EXECCODE	HMENU		112
+BTN_QUIT_TEXT		BYTE		"Quit", 0
+
+mainHwnd				HWND		?
+pmHwnd					HWND		?
 
 .code
-
 Pause_init PROC
- 	call	main_getHInstance
+	call	main_getHInstance
 	mov		hInstance, eax
 	mov     PauseClass.hInstance, eax
 	mov     PauseClass.style, NULL
@@ -47,86 +47,83 @@ Pause_init PROC
 	mov     PauseClass.hCursor, eax
 
 	invoke  RegisterClassEx, OFFSET PauseClass
+
 	ret
 Pause_init ENDP
 
 Pause_create PROC USES edx, main_hwnd: HWND
-	mov edx, main_hwnd
-    mov mainHwnd, edx
-
-    invoke  CreateWindowEx, NULL, OFFSET PauseClassName, OFFSET PauseTitle,\
+	mov 	edx, main_hwnd
+	mov 	mainHwnd, edx
+	
+	invoke  CreateWindowEx, NULL, OFFSET PauseClassName, OFFSET PauseTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
-			main_hwnd, NULL, hInstance, NULL
+			mainHwnd, NULL, hInstance, NULL
+	mShow eax
+	mov     pmHwnd, eax
 
-    mov Pause_hwnd, eax
-    mShow Pause_hwnd
+	invoke  ShowWindow, pmHwnd, SW_HIDE
+	invoke  UpdateWindow, pmHwnd
 
-    invoke  ShowWindow, Pause_hwnd, SW_HIDE
-	invoke  UpdateWindow, Pause_hwnd
-
-	mov eax, Pause_hwnd
-    ret
+	mov eax, pmHwnd
+	ret
 Pause_create ENDP
 
-Pause_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
-    .IF uMsg == WM_CREATE
+Pause_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+	; LOCAL buttonStringPtr: BYTE PTR
+
+	.IF uMsg == WM_CREATE
 		; call normal_bgm_play
-        mWriteLn "YOU Pause"
 		invoke GetIndexedStr, $BUTTON$
 		
 		mov ebx, _WINDOW_WIDTH
 		sub ebx, BTN_WIDTH
 		shr ebx, 1
 
-		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_BACK_TEXT,\
+		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_CONTINUE_TEXT,\
 			WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON,\
 			ebx, 200, BTN_WIDTH, BTN_HEIGHT,\
-			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
+			hwnd, BTN_CONTINUE_EXECCODE, hInstance, NULL
 
-        
+		invoke GetIndexedStr, $BUTTON$
 		mov ebx, _WINDOW_WIDTH
 		sub ebx, BTN_WIDTH
 		shr ebx, 1
 
-		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_BACK_TEXT,\
+		invoke  CreateWindowEx, NULL, eax, OFFSET BTN_QUIT_TEXT,\
 			WS_CHILD or WS_VISIBLE or BS_DEFPUSHBUTTON,\
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
-			hwnd, BTN_MENU_EXECCODE, hInstance, NULL    
-
+			hwnd, BTN_QUIT_EXECCODE, hInstance, NULL
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
-		.IF eax == BTN_BACK_EXECCODE
-            call Pause_Hide
-	    .ELSEIF eax == BTN_MENU_EXECCODE
-            call game_destory
-		 	mWriteLn "EXIT GAME"
-            invoke StartMenu_create, mainHwnd
+		.IF eax == BTN_CONTINUE_EXECCODE
+			; call normal_bgm_close
+			invoke ShowWindow, hwnd, SW_HIDE
+			; invoke Game_create, mainHwnd
+			call Game_Show
+			mWriteLn "BACK TO GAME"
+		.ELSEIF eax == BTN_QUIT_EXECCODE
+			mWriteLn "QUIT"
+			call main_stop
 		.ENDIF
-    .ELSEIF uMsg == WM_DESTROY
-		invoke	GdipDeleteGraphics, bufferGraphic
-		invoke	DeleteObject, hbitmap
-		invoke	DeleteDC, hdcBuffer
-		invoke	GdipDeleteGraphics, mainGraphic
-		invoke	ReleaseDC, hwnd, hdc
-		mWriteLn "Destory"
-
 	.ENDIF
 
     invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
-    ret
+
+	ret
 Pause_Process ENDP
 
 
 Pause_Show PROC
-    invoke ShowWindow, Pause_hwnd, SW_SHOW
-    invoke UpdateWindow, Pause_hwnd
+	mWriteLn "in here"
+    invoke ShowWindow, pmHwnd, SW_SHOW
+    invoke UpdateWindow, pmHwnd
     ret
 Pause_Show ENDP
 
 Pause_Hide PROC
-    invoke ShowWindow, Pause_hwnd, SW_HIDE
-    invoke UpdateWindow, Pause_hwnd
+    invoke ShowWindow, pmHwnd, SW_HIDE
+    invoke UpdateWindow, pmHwnd
     ret
 Pause_Hide ENDP
 
