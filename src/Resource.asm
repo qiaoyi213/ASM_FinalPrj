@@ -87,7 +87,7 @@ Resource_loadAll PROC USES eax
 
 	invoke Resource_load, OFFSET __slime0, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 0) * TYPE DWORD]
 	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 1) * TYPE DWORD]
-	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 2) * TYPE DWORD]
+	invoke Resource_load, OFFSET __slime2, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 2) * TYPE DWORD]
 
 	ret
 Resource_loadAll ENDP

@@ -1,14 +1,15 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 INCLUDE Reference.inc
 
 extern Number_to_String:PROTO, :DWORD, :PTR BYTE, :DWORD
 extern Reverse_String: PROTO, :PTR BYTE, :DWORD
 
 .data
-Score       DWORD       0
-ScoreText   BYTE        "0000"
+Score           DWORD       0
+ScoreText       BYTE        "0000"
 
 .code
 
@@ -36,7 +37,7 @@ Score_Sub PROC USES eax, num:DWORD
     ret
 Score_Sub ENDP
 
-DrawScore PROC USES eax , hdcBuffer:HDC
+DrawScore PROC USES eax esi edi, hdcBuffer: HDC
     LOCAL   OldMode: DWORD
 	invoke 	SetBkMode, hdcBuffer, TRANSPARENT								;設定以透明顯示
     mov     OldMode, eax
@@ -44,7 +45,7 @@ DrawScore PROC USES eax , hdcBuffer:HDC
     invoke  Number_to_String, Score, OFFSEt ScoreText, 4
     invoke  Reverse_String, OFFSET ScoreText, 4
 	invoke	TextOut, hdcBuffer, 1000, 20, OFFSET ScoreText, LENGTHOF ScoreText
-	invoke 	SetBkMode, hdcBuffer, OldMode										;設定回原本的模式顯示
+	invoke 	SetBkMode, hdcBuffer, OldMode
     ret
 DrawScore ENDP
 

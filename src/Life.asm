@@ -47,7 +47,11 @@ DrawLife PROC USES ebx ecx edx, mainGraphic: DWORD
 			mov ebx, HE
 		.ENDIF
 
+		push ecx
+		push edx
 		invoke	GdipDrawImagePointRectI, mainGraphic, ebx, edx, 0, 0, 0, 36, 32, UnitPixel
+		pop edx
+		pop ecx
 		add edx, 36
 		inc ecx
 	.ENDW

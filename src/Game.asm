@@ -16,7 +16,7 @@ extern Slime_update: PROTO, :PTR Mob
 extern Slime_hert: PROTO, :PTR Mob, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
-extern DrawScore: PROTO, :DWORD
+extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :DWORD
 DrawMob PROTO, :Mob
 
@@ -35,9 +35,11 @@ GameClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET GameClassName,?>
 GameTitle			BYTE		"Game Title", 0
 game_hwnd			HWND		?
 
-; cacheImage			DWORD		?	; PTR GpBitmap
-; cacheGraphic		DWORD		?	; PTR GpGraphics
+hdc					HDC			?
+hdcBuffer			HDC			?
+hbitmap				HBITMAP		?
 mainGraphic			DWORD		?	; PTR GpGraphics
+bufferGraphic		DWORD		?
 
 isInvincible		DWORD		0
 invincibleTick		DWORD		0
@@ -80,29 +82,34 @@ Game_create PROC, main_hwnd: HWND
 Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
-	local    @gdip
-
-    .IF uMsg == WM_CREATE
+	.IF uMsg == WM_CREATE
 		call	Resource_loadAll
 		invoke	SetTimer, hwnd, TimerID, 100, NULL
 
-		invoke	GdipCreateFromHWND, hwnd, ADDR mainGraphic
-		; invoke	GdipCreateBitmapFromGraphics, _WINDOW_WIDTH, _WINDOW_HEIGHT, ADDR mainGraphic, ADDR cacheImage
+		invoke GetDC, hwnd
+		mov hdc, eax
+		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+
+		invoke	CreateCompatibleDC, hdc
+		mov		hdcBuffer, eax
+		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
+		mov		hbitmap, eax
+		invoke	SelectObject, hdcBuffer, hbitmap
+		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
 
 		invoke	Level_Load, 1, ADDR mobList
 		mov 	mobAmount, ecx
 
 	.ELSEIF uMsg == WM_PAINT
-		; mWriteLn "paint"
-		; invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
-				; 0, 0, SRCCOPY
+		call	Game_draw
+		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		mov ecx, 0
 		mov esi, 0
 		.WHILE ecx < mobAmount
 			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1 && mobList[esi].state == 3
+			.IF eax == 1 && mobList[esi].state == 2
 				.IF isInvincible == 0
 					invoke Life_Sub, 1
 					mov isInvincible, 1
@@ -123,14 +130,15 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
-		call Game_draw
-		
 		invoke InvalidateRect, hwnd, NULL, TRUE
 
 	.ELSEIF uMsg == WM_DESTROY
+		invoke	GdipDeleteGraphics, bufferGraphic
+		invoke	DeleteObject, hbitmap
+		invoke	DeleteDC, hdcBuffer
 		invoke	GdipDeleteGraphics, mainGraphic
+		invoke	ReleaseDC, hwnd, hdc
 		mWriteLn "Destory"
-
     .ENDIF
 
 	invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
@@ -152,14 +160,14 @@ Game_Hide ENDP
 Game_draw PROC USES eax
 	call DrawBG
 	call DrawMobs
-	INVOKE	DrawLife, mainGraphic
-	; INVOKE 	DrawScore, hdcBuffer
+	INVOKE	DrawLife, bufferGraphic
+	INVOKE 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
 
 DrawBG PROC USES eax
 	call 	Resource_getBGImg
-	invoke	GdipDrawImageRectI, mainGraphic, eax, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT
+	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT
 	ret
 DrawBG ENDP
 
@@ -181,7 +189,7 @@ DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
 	mov		ebx, eax
 	mov		eax, mob._width
 	mul		mob.AnimationTick
-	invoke	GdipDrawImagePointRectI, mainGraphic, ebx, mob.X, mob.Y, eax, 0, mob._width, mob._height, UnitPixel
+	invoke	GdipDrawImagePointRectI, bufferGraphic, ebx, mob.X, mob.Y, eax, 0, mob._width, mob._height, UnitPixel
 	ret
 DrawMob ENDP
 
