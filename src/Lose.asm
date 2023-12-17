@@ -31,7 +31,7 @@ bufferGraphic		DWORD		?
 BTN_BACK_EXECCODE   HMENU       103
 BTN_BACK_TEXT       BYTE        "Back to Menu", 0
 
-LOSE_TEXT			BYTE		"You LOSE"
+LOSE_TEXT			BYTE		"You LOSE", 0
 mainHwnd            HWND        ?
 
 .code
@@ -59,8 +59,6 @@ Lose_create PROC USES eax edx, main_hwnd: HWND
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
 			main_hwnd, NULL, hInstance, NULL
-	
-	
 
     mov Lose_hwnd, eax
     mShow Lose_hwnd
@@ -72,6 +70,7 @@ Lose_create PROC USES eax edx, main_hwnd: HWND
 Lose_create ENDP
 
 Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+	local @gdip
     .IF uMsg == WM_CREATE
         mWriteLn "YOU LOSE"
 		
@@ -86,20 +85,17 @@ Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
 
-		invoke GetDC, hwnd
-		mov hdc, eax
-		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+		invoke GetIndexedStr, $BUTTON$
+		
+		mov ebx, _WINDOW_WIDTH
+		sub ebx, BTN_WIDTH
+		shr ebx, 1
 
-		invoke	CreateCompatibleDC, hdc
-		mov		hdcBuffer, eax
-		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
-		mov		hbitmap, eax
-		invoke	SelectObject, hdcBuffer, hbitmap
-		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
+		invoke  CreateWindowEx, NULL, eax, OFFSET LOSE_TEXT,\
+			WS_CHILD or WS_VISIBLE or BS_FLAT,\
+			ebx, 200, BTN_WIDTH, BTN_HEIGHT,\
+			hwnd, 0, hInstance, NULL
 
-	.ELSEIF uMsg == WM_PAINT
-		call	Lose_draw
-		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_BACK_EXECCODE
@@ -142,9 +138,6 @@ Lose_Hide PROC
 Lose_Hide ENDP
 
 Lose_draw PROC USES eax
-	call Resource_getLose
-	mShow eax
-	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, 640, 400
 	ret
 Lose_draw ENDP
 END

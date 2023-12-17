@@ -30,6 +30,8 @@ bufferGraphic		DWORD		?
 
 BTN_BACK_EXECCODE   HMENU       103
 BTN_BACK_TEXT       BYTE        "Back to Menu", 0
+
+VICTORY_TEXT		BYTE		"Victory!!", 0
 mainHwnd            HWND        ?
 
 .code
@@ -83,10 +85,21 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
 
-		invoke GetDC, hwnd
-		mov hdc, eax
-		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
-		call	Victory_draw
+		
+		invoke GetIndexedStr, $BUTTON$
+		
+		mov ebx, _WINDOW_WIDTH
+		sub ebx, BTN_WIDTH
+		shr ebx, 1
+
+		invoke  CreateWindowEx, NULL, eax, OFFSET VICTORY_TEXT,\
+			WS_CHILD or WS_VISIBLE or BS_FLAT,\
+			ebx, 200, BTN_WIDTH, BTN_HEIGHT,\
+			hwnd, 0, hInstance, NULL
+		; invoke GetDC, hwnd
+		; mov hdc, eax
+		; invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+		
 		
 	.ELSEIF uMsg == WM_PAINT
 		
@@ -120,7 +133,7 @@ Victory_Show PROC
 	call victory_bgm_play
     invoke ShowWindow, Victory_hwnd, SW_SHOW
     invoke UpdateWindow, Victory_hwnd
-	
+	call	Victory_draw
     ret
 Victory_Show ENDP
 
