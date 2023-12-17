@@ -27,6 +27,15 @@ CLOSE_SLIME_DEAD    BYTE    "close slimeDead", 0
 PLAY_PLAYER_HIT     BYTE    "play .\\resources\\assets\\player_hit.wav", 0
 CLOSE_PLAYER_HIT    BYTE    "close playerHit", 0
 
+; OPEN_VICTORY_BGM    BYTE    "", 0
+; PLAY_VICTORY_BGM    BYTE    "", 0
+; CLOSE_VICTORY_BGM   BYTE    "", 0
+
+; OPEN_LOSE_BGM       BYTE    "", 0
+; PLAY_LOSE_BGM       BYTE    "", 0
+; CLOSE_LOSE_BGM      BYTE    "", 0
+
+
 .code
 
 normal_bgm_play PROC

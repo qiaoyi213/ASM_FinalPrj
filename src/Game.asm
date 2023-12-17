@@ -6,7 +6,7 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern Level_Load: PROTO, :DWORD, :PTR Mob
-
+extern Victory_create: PROTO, :HWND
 extern Resource_loadAll: PROC
 extern Resource_getBGImg: PROC
 extern Resource_getMobImg: PROTO, :Mob
@@ -18,13 +18,18 @@ extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
 extern battle_bgm_play: PROC
-
+extern battle_bgm_close: PROTO
+extern Victory_Show: PROC
+extern Lose_create: PROTO, :HWND
+extern Lose_Show: PROC
+extern Life_Change: PROTO, :DWORD
+extern Score_Change: PROTO, :DWORD
+extern Life_Get: PROC
 DrawMob PROTO, :Mob
 Game_mousemove PROTO, :LPARAM
 
 .data
 Level	            BYTE		0
-Life				WORD		5
 
 mobList				Mob			_MOB_LIST_MAX_SIZE DUP(<0, 0, ?, ?, ?, ?, ?>)
 mobAmount			DWORD		0
@@ -47,6 +52,8 @@ bufferGraphic		DWORD		?
 isInvincible		DWORD		0
 invincibleTick		DWORD		0
 
+mainHwnd			HWND		?
+
 .code
 
 Game_init PROC
@@ -66,8 +73,11 @@ Game_init PROC
 	ret
 Game_init ENDP
 
-Game_create PROC, main_hwnd: HWND
+Game_create PROC USES edx, main_hwnd: HWND
 	mWriteLn "GAME CREATE"
+	mov edx, main_hwnd
+	mov mainHwnd, edx
+
     invoke  CreateWindowEx, NULL, OFFSET GameClassName, OFFSET GameTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
@@ -110,7 +120,20 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		invoke Game_mousemove, lParam
-		
+		mov ebx, mobAmount
+		.IF levelKilled == ebx
+			invoke battle_bgm_close
+			invoke Victory_create, mainHwnd
+			call Victory_Show
+			invoke DestroyWindow, hwnd
+		.ENDIF
+		call Life_Get
+		.IF eax == 0
+			invoke battle_bgm_close
+			invoke Lose_create, mainHwnd
+			call Lose_Show
+			invoke DestroyWindow, hwnd
+		.ENDIF
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
 		invoke InvalidateRect, hwnd, NULL, TRUE
@@ -121,6 +144,7 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		invoke	DeleteDC, hdcBuffer
 		invoke	GdipDeleteGraphics, mainGraphic
 		invoke	ReleaseDC, hwnd, hdc
+		call	Game_reset
 		mWriteLn "Destory"
     .ENDIF
 
@@ -139,6 +163,13 @@ Game_Hide PROC
 	invoke UpdateWindow, game_hwnd
 	ret
 Game_Hide ENDP
+
+Game_reset PROC
+	invoke Life_Change, 5
+	invoke Score_Change, 0
+	mov levelKilled, 0
+	call Randomize
+Game_reset ENDP
 
 Game_draw PROC USES eax
 	call	DrawBG
@@ -195,7 +226,7 @@ update_mobs_loop:
 	ret
 Game_update ENDP
 
-Game_mousemove PROC USES eax ecx edx esi edi, lParam: LPARAM
+Game_mousemove PROC USES eax ebx ecx edx esi edi, lParam: LPARAM
 	LOCAL isTouched: DWORD
 	mov ecx, 0
 	mov esi, 0
@@ -219,6 +250,8 @@ Game_mousemove PROC USES eax ecx edx esi edi, lParam: LPARAM
 		.IF isTouched == 0 && mobList[esi].isTouched == 1
 			mov mobList[esi].isTouched, 0
 		.ENDIF
+		mov ebx, mobAmount
+		
 		inc ecx
 		add esi, TYPE Mob
 	.ENDW

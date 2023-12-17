@@ -15,10 +15,10 @@ DrawMob PROTO, :Mob
 .data
 
 hInstance			HINSTANCE	?
-VictoryClassName	BYTE		"PaneVictory", 0
-VictoryClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET VictoryClassName,?>
-VictoryTitle		BYTE		"Victory Title", 0
-Victory_hwnd		HWND		?
+LoseClassName	BYTE		"PaneLose", 0
+LoseClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET LoseClassName,?>
+LoseTitle		BYTE		"Lose Title", 0
+Lose_hwnd		HWND		?
 BTN_WIDTH			DWORD		400
 BTN_HEIGHT			DWORD		60
 hdc					HDC			?
@@ -33,44 +33,44 @@ mainHwnd            HWND        ?
 
 .code
 
-Victory_init PROC
+Lose_init PROC
  	call	main_getHInstance
 	mov		hInstance, eax
-	mov     VictoryClass.hInstance, eax
-	mov     VictoryClass.style, NULL
-	mov     VictoryClass.lpfnWndProc, OFFSET Victory_Process
-	mov     VictoryClass.hbrBackground, COLOR_WINDOW+1
+	mov     LoseClass.hInstance, eax
+	mov     LoseClass.style, NULL
+	mov     LoseClass.lpfnWndProc, OFFSET Lose_Process
+	mov     LoseClass.hbrBackground, COLOR_WINDOW+1
 
 	invoke  LoadCursor, NULL, IDC_ARROW
-	mov     VictoryClass.hCursor, eax
+	mov     LoseClass.hCursor, eax
 
-	invoke  RegisterClassEx, OFFSET VictoryClass
+	invoke  RegisterClassEx, OFFSET LoseClass
 	ret
-Victory_init ENDP
+Lose_init ENDP
 
-Victory_create PROC USES eax edx, main_hwnd: HWND
+Lose_create PROC USES eax edx, main_hwnd: HWND
 	mov edx, main_hwnd
     mov mainHwnd, edx
 
-    invoke  CreateWindowEx, NULL, OFFSET VictoryClassName, OFFSET VictoryTitle,\
+    invoke  CreateWindowEx, NULL, OFFSET LoseClassName, OFFSET LoseTitle,\
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
 			main_hwnd, NULL, hInstance, NULL
 
-    mov Victory_hwnd, eax
-    mShow Victory_hwnd
+    mov Lose_hwnd, eax
+    mShow Lose_hwnd
 
-    invoke  ShowWindow, Victory_hwnd, SW_HIDE
-	invoke  UpdateWindow, Victory_hwnd
+    invoke  ShowWindow, Lose_hwnd, SW_HIDE
+	invoke  UpdateWindow, Lose_hwnd
 
-	mov eax, Victory_hwnd
+	mov eax, Lose_hwnd
     ret
-Victory_create ENDP
+Lose_create ENDP
 
-Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
+Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
 		; call normal_bgm_play
-        mWriteLn "VICTORY"
+        mWriteLn "YOU LOSE"
 		invoke GetIndexedStr, $BUTTON$
 		
 		mov ebx, _WINDOW_WIDTH
@@ -105,19 +105,19 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
 
     invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
     ret
-Victory_Process ENDP
+Lose_Process ENDP
 
 
-Victory_Show PROC
-    invoke ShowWindow, Victory_hwnd, SW_SHOW
-    invoke UpdateWindow, Victory_hwnd
+Lose_Show PROC
+    invoke ShowWindow, Lose_hwnd, SW_SHOW
+    invoke UpdateWindow, Lose_hwnd
     ret
-Victory_Show ENDP
+Lose_Show ENDP
 
-Victory_Hide PROC
-    invoke ShowWindow, Victory_hwnd, SW_HIDE
-    invoke UpdateWindow, Victory_hwnd
+Lose_Hide PROC
+    invoke ShowWindow, Lose_hwnd, SW_HIDE
+    invoke UpdateWindow, Lose_hwnd
     ret
-Victory_Hide ENDP
+Lose_Hide ENDP
 
 END
