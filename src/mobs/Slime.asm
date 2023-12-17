@@ -3,16 +3,19 @@ INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
 INCLUDE ../Reference.inc
 
+extern GetIndexedStr: PROTO, :PTR BYTE
 extern Score_Add :PROTO, :DWORD
 extern slime_hit_play: PROC
 extern slime_dead_play: PROC
+extern slime_hit_close: PROC
+extern slime_dead_close: PROC
+
 .data
 	AttackEdge		DWORD	50
-	AnimationEdges	DWORD	10, 5, 10, 10
-	
+	AnimationEdges	DWORD	10, 5, 10, 20
 .code
 
-Slime_Build PROC, mptr: PTR Mob
+Slime_Build PROC USES eax esi, mptr: PTR Mob
 	mov esi, mptr
 
 	mov (Mob PTR [esi])._type, _MOB_SLIME_ID
@@ -23,7 +26,12 @@ Slime_Build PROC, mptr: PTR Mob
 
 	mov (Mob PTR [esi]).HP, 100
 
-	mov (Mob PTR [esi]).AttackTick, 0
+	; random attack tick
+	mov eax, AttackEdge
+	shr eax, 1
+	call RandomRange
+
+	mov (Mob PTR [esi]).AttackTick, eax
 	mov (Mob PTR [esi]).AnimationTick, 0
 
 	mov eax, AnimationEdges[0]
@@ -61,7 +69,7 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 		inc atkTick
 	.ENDIF
 
-	.IF state == 4
+	.IF state == _MOB_STATE_SIZE
 		ret
 	.ENDIF
 
@@ -69,11 +77,9 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	mov ebx, aniEdge
 	.IF eax >= ebx
 		mov aniTick, 0
-		.IF state == 2
-			mov state, 3
-		.ELSEIF state == 3 
-			mov state, 0
-		.ELSEIF state == 1
+		.IF state == 1
+			mov state, 2
+		.ELSEIF state == 2
 			mov state, 0
 		.ENDIF
 	.ENDIF
@@ -82,7 +88,7 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	mov ebx, atkEdge
 	.IF eax >= ebx
 		mov atkTick, 0
-		mov state, 2
+		mov state, 1
 		mov aniTick, 0
 	.ENDIF
 	
@@ -104,21 +110,24 @@ Slime_update PROC USES eax ebx esi, mptr: PTR Mob
 	ret	
 Slime_update ENDP
 
-Slime_hert PROC USES eax esi, mptr: PTR Mob, MATK: DWORD
+Slime_hurt PROC USES esi, mptr: PTR Mob, MATK: DWORD
 	mov esi, mptr
 	mov eax, (Mob PTR [esi]).HP
 	sub eax, MATK
 
 	mov (Mob PTR [esi]).HP, eax
-	mShow (Mob PTR [esi]).HP
+	mov eax, 0
+	call slime_hit_close
 	call slime_hit_play
 	.IF (Mob PTR [esi]).HP <= 0
-		mov (Mob PTR [esi]).state, 4
+		mov (Mob PTR [esi]).state, _MOB_STATE_SIZE
 		invoke Score_Add, 100
+		call slime_dead_close
 		call slime_dead_play
 		mWriteLn "DEAD"
+		mov eax, 1
 	.ENDIF
 
 	ret
-Slime_hert ENDP
+Slime_hurt ENDP
 END

@@ -7,37 +7,40 @@ INCLUDE Reference.inc
 
 .code
 
-Number_to_String PROC USES eax ebx ecx edx edi, num: DWORD, StrPtr: PTR  BYTE, str_len: DWORD
-    LOCAL   const10: DWORD
-    mov     edi, str_len  ; 字串長度
-    mov     edx, 10
-    mov     const10, edx
-    
-    mov     eax, num
-    mov     esi, StrPtr
-transfer_number_loop:
-    xor     edx, edx 
+Number_to_String PROC USES eax ebx ecx edx esi edi, num: DWORD, StrPtr: PTR  BYTE, str_len: DWORD
+    mov esi, str_len
+    dec esi
+    mov ecx, 0
+    .WHILE ecx < str_len
+        push ecx
+            mov ecx, 0
+            mov eax, 1
+            mov ebx, 10
+            .WHILE ecx < esi
+                mul ebx
+                inc ecx
+            .ENDW
+        pop ecx
 
-    div     const10
-    add     edx, 48
-    mov     [esi], edx
-    dec     edi
-    add     esi, (TYPE BYTE)
-    
-    test    eax, eax
-    je      zero_quotient
-    jmp     transfer_number_loop
+        mov ebx, eax
 
-zero_quotient:
+        mov edx, 0
+        mov eax, num
+        div ebx
 
-    mov ecx, edi
-    
-padding:
-    mov     [esi], 48
-    add     esi, (TYPE BYTE)
-    loop padding
-    
+        mov edi, StrPtr
+        add edi, esi
+        mov [edi], 48
+        .IF eax < 10
+            add [edi], eax
+        .ENDIF
 
+        mul ebx
+        sub num, eax
+        
+        dec esi
+        inc ecx
+    .ENDW
     ret
 Number_to_String ENDP
 

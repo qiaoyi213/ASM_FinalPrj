@@ -4,11 +4,13 @@ INCLUDE Macros.inc
 INCLUDE ../Reference.inc
 
 extern main_getHInstance: PROC
+extern main_stop:PROC
 extern GetIndexedStr: PROTO, :DWORD
 extern Game_create: PROTO, :HWND
 extern Game_Show: PROC
 extern normal_bgm_play: PROC
 extern normal_bgm_close: PROC
+
 .data
 
 hInstance				HINSTANCE	?
@@ -68,7 +70,6 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	; LOCAL buttonStringPtr: BYTE PTR
 
 	.IF uMsg == WM_CREATE
-		mWriteLn "CREATE MENU"
 		call normal_bgm_play
 		invoke GetIndexedStr, $BUTTON$
 		
@@ -97,9 +98,10 @@ StartMenu_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 			invoke ShowWindow, hwnd, SW_HIDE
 			invoke Game_create, mainHwnd
 			call Game_Show
-			mWrite "START GAME"
+			mWriteLn "START GAME"
 		.ELSEIF eax == BTN_EXIT_EXECCODE
-			mWrite "EXIT GAME"
+			mWriteLn "EXIT GAME"
+			call main_stop
 		.ENDIF
 	.ENDIF
 
