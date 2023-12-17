@@ -25,6 +25,9 @@ extern Lose_Show: PROC
 extern Life_Change: PROTO, :DWORD
 extern Score_Change: PROTO, :DWORD
 extern Life_Get: PROC
+extern Pause_create: PROTO, :HWND
+extern Pause_Show: PROTO
+
 DrawMob PROTO, :Mob
 Game_mousemove PROTO, :LPARAM
 
@@ -113,11 +116,21 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 
 		invoke	Level_Load, 1, ADDR mobList
 		mov 	mobAmount, ecx
+		
+		invoke Pause_create, hwnd
+		call Game_Hide
+		invoke Pause_Show
 
 	.ELSEIF uMsg == WM_PAINT
 		call	Game_draw
 		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
-	
+	.ELSEIF uMsg == WM_KEYDOWN
+		mShow wParam
+		.IF wParam == VK_ESCAPE
+			mWriteLn "ESC"
+			invoke Pause_create, hwnd
+			invoke Pause_Show
+		.ENDIF
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		invoke Game_mousemove, lParam
 		mov ebx, mobAmount
@@ -146,6 +159,8 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		invoke	ReleaseDC, hwnd, hdc
 		call	Game_reset
 		mWriteLn "Destory"
+	
+	
     .ENDIF
 
 	invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
@@ -257,5 +272,10 @@ Game_mousemove PROC USES eax ebx ecx edx esi edi, lParam: LPARAM
 	.ENDW
 	ret
 Game_mousemove ENDP
+
+game_destory PROC
+	invoke DestroyWindow, game_hwnd
+	ret
+game_destory ENDP
 
 END

@@ -13,6 +13,7 @@ extern StartMenu_init: PROC
 extern Game_init: PROC
 extern Victory_init: PROC
 extern Lose_init: PROC
+extern Pause_init: PROC
 extern Resource_init: PROC
 extern Resource_cleanUp: PROC
 
@@ -38,7 +39,7 @@ main PROC
 	
 	call	Victory_init
 	call	Lose_init
-
+	call	Pause_init
 	call	Window_create	
 	call	Window_handleMsg
 
