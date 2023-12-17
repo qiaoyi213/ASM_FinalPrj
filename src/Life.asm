@@ -31,6 +31,11 @@ Life_Change PROC USES edx, num: DWORD
     ret
 Life_Change ENDP
 
+Life_Get PROC
+	mov eax, Life
+	ret
+Life_Get ENDP
+
 DrawLife PROC USES ebx ecx edx, mainGraphic: DWORD
 	LOCAL HF: DWORD
 	LOCAL HE: DWORD
