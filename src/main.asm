@@ -1,7 +1,7 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-INCLUDE WinUser.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 
 INCLUDE Reference.inc
 
@@ -22,11 +22,14 @@ extern Read_all_sound: PROC
 	; 0 : start menu
 	; 1 : in game
 	State		DWORD		0
+
+	GpInput			GdiplusStartupInput <1, 0, 0, 0>
+	hToken			DWORD				?
 .code
 
 main PROC
 	call Boot
-	call Resource_init
+	invoke	GdiplusStartup, offset hToken, offset GpInput, NULL
 	call Window_init
  	call StartMenu_init
 	call Game_init
@@ -34,8 +37,8 @@ main PROC
 
 	call Window_create	
 	call Window_handleMsg
-	call Resource_cleanUp
 
+	invoke	GdiplusShutdown, hToken
 	invoke  ExitProcess, eax
 
 	ret

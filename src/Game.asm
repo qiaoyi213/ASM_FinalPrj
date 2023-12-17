@@ -21,7 +21,6 @@ extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
 extern DrawLife: PROTO, :HDC
 extern battle_bgm_play: PROC
-Game_draw PROTO, :HWND
 DrawMob PROTO, :Mob
 
 .data
@@ -152,12 +151,8 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 Game_Process ENDP
 
 Game_Show PROC
-	invoke   GdiplusStartup,offset hToken,offset GpInput,NULL
-
 	invoke ShowWindow, game_hwnd, SW_SHOW
 	invoke UpdateWindow, game_hwnd
-
-	invoke   GdiplusShutdown,hToken
 	ret
 Game_Show ENDP
 
@@ -168,10 +163,10 @@ Game_Hide PROC
 Game_Hide ENDP
 
 Game_draw PROC USES eax
-	call DrawBG
-	call DrawMobs
-	INVOKE	DrawLife, bufferGraphic
-	INVOKE 	DrawScore, hdcBuffer
+	call	DrawBG
+	call	DrawMobs
+	invoke	DrawLife, bufferGraphic
+	invoke 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
 

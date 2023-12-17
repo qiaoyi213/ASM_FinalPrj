@@ -10,9 +10,6 @@ extern main_getHInstance: PROC
 Resource_load PROTO, :PTR BYTE, :PTR DWORD
 
 .data
-	GpInput			GdiplusStartupInput <1, 0, 0, 0>
-	hToken			DWORD				?
-	
 	WideNameBuf		WORD		64 DUP(0)
 	NameBuf			BYTE		64 DUP(0)
 	__resource		BYTE		"resources/", 0
@@ -33,18 +30,6 @@ Resource_load PROTO, :PTR BYTE, :PTR DWORD
 
 
 .code
-
-Resource_init PROC
-	mWriteLn "Resource init"
-	invoke	GdiplusStartup, offset hToken, offset GpInput, NULL
-	ret
-Resource_init ENDP
-
-Resource_cleanUp PROC
-	mWriteLn "Resource clean up"
-	invoke	GdiplusShutdown, hToken
-	ret
-Resource_cleanUp ENDP
 
 Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR DWORD
 format_directory:
