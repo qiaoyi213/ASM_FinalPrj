@@ -7,8 +7,9 @@ INCLUDE Reference.inc
 extern main_getHInstance: PROC
 extern StartMenu_create: PROTO, :HWND
 extern GetIndexedStr: PROTO, :DWORD
-
-
+extern victory_bgm_play: PROC
+extern victory_bgm_stop: PROC
+extern Resource_getVictory: PROC
 DrawMob PROTO, :Mob
 
 
@@ -29,6 +30,8 @@ bufferGraphic		DWORD		?
 
 BTN_BACK_EXECCODE   HMENU       103
 BTN_BACK_TEXT       BYTE        "Back to Menu", 0
+
+VICTORY_TEXT		BYTE		"Victory!!", 0
 mainHwnd            HWND        ?
 
 .code
@@ -69,7 +72,7 @@ Victory_create ENDP
 
 Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
     .IF uMsg == WM_CREATE
-		; call normal_bgm_play
+		
         mWriteLn "VICTORY"
 		invoke GetIndexedStr, $BUTTON$
 		
@@ -82,6 +85,25 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
 
+		
+		invoke GetIndexedStr, $BUTTON$
+		
+		mov ebx, _WINDOW_WIDTH
+		sub ebx, BTN_WIDTH
+		shr ebx, 1
+
+		invoke  CreateWindowEx, NULL, eax, OFFSET VICTORY_TEXT,\
+			WS_CHILD or WS_VISIBLE or BS_FLAT,\
+			ebx, 200, BTN_WIDTH, BTN_HEIGHT,\
+			hwnd, 0, hInstance, NULL
+		; invoke GetDC, hwnd
+		; mov hdc, eax
+		; invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+		
+		
+	.ELSEIF uMsg == WM_PAINT
+		
+		; invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_BACK_EXECCODE
@@ -107,17 +129,25 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
     ret
 Victory_Process ENDP
 
-
 Victory_Show PROC
+	call victory_bgm_play
     invoke ShowWindow, Victory_hwnd, SW_SHOW
     invoke UpdateWindow, Victory_hwnd
+	call	Victory_draw
     ret
 Victory_Show ENDP
 
 Victory_Hide PROC
+	call victory_bgm_stop
     invoke ShowWindow, Victory_hwnd, SW_HIDE
     invoke UpdateWindow, Victory_hwnd
     ret
 Victory_Hide ENDP
 
+Victory_draw PROC
+	call Resource_getVictory
+	mShow mainGraphic
+	invoke	GdipDrawImageRectI, mainGraphic, eax, 0, 0, 640, 400
+	ret
+Victory_draw ENDP
 END

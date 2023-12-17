@@ -28,6 +28,11 @@ Resource_load PROTO, :PTR BYTE, :PTR DWORD
 	__slime1		BYTE		"slime1", 0
 	__slime2		BYTE		"slime2", 0
 
+	LoseImg			DWORD		?
+	__LoseImg		BYTE		"Lose", 0
+
+	VictoryImg		DWORD		?
+	__VictoryImg	BYTE		"Victory", 0
 
 .code
 
@@ -61,6 +66,7 @@ move_into_WideBuffer:
 	.ENDW
 loader:
 	invoke GdipLoadImageFromFile, OFFSET WideNameBuf, imgPtr
+	mShow eax
 	ret
 Resource_load ENDP
 
@@ -74,6 +80,9 @@ Resource_loadAll PROC USES eax
 	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 1) * TYPE DWORD]
 	invoke Resource_load, OFFSET __slime2, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 2) * TYPE DWORD]
 
+	invoke Resource_load, OFFSET __LoseImg, OFFSET LoseImg
+	
+	invoke Resource_load, OFFSEt __VictoryImg, OFFSET VictoryImg
 	ret
 Resource_loadAll ENDP
 
@@ -104,6 +113,14 @@ Resource_getHeartImg PROC, isFull: DWORD
 	ret
 Resource_getHeartImg ENDP
 
+Resource_getLose PROC
+	mov eax, LoseImg
+	ret
+Resource_getLose ENDP
 
+Resource_getVictory PROC
+	mov eax, VictoryImg
+	ret
+Resource_getVictory ENDP
 
 END

@@ -6,6 +6,11 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern StartMenu_create: PROTO, :HWND
+extern Lose_create: PROTO, :HWND
+extern Victory_create: PROTO, :HWND
+extern Pause_create: PROTO, :HWND
+
+extern Pause_Show: PROC
 
 Window_Process PROTO, :HWND, :UINT, :WPARAM, :LPARAM
 Window_Paint PROTO, :HWND
@@ -84,12 +89,15 @@ Window_handleMsg ENDP
 Window_Process PROC, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
 	.IF uMsg == WM_CREATE
 		invoke StartMenu_create, hwnd
+		invoke Victory_create, hwnd
+		invoke Lose_create, hwnd
+		invoke Pause_create, hwnd
+		; call Pause_Show
 
 	.ELSEIF uMsg == WM_DESTROY
 		invoke  PostQuitMessage, NULL
 		mov eax, 0
 		ret
-
 	.ENDIF
 msg_process:
     invoke  DefWindowProc, hwnd, uMsg, wParam, lParam

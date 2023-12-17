@@ -6,7 +6,6 @@ INCLUDE Reference.inc
 
 extern main_getHInstance: PROC
 extern Level_Load: PROTO, :DWORD, :PTR Mob
-extern Victory_create: PROTO, :HWND
 extern Resource_loadAll: PROC
 extern Resource_getBGImg: PROC
 extern Resource_getMobImg: PROTO, :Mob
@@ -20,11 +19,13 @@ extern DrawLife: PROTO, :HDC
 extern battle_bgm_play: PROC
 extern battle_bgm_close: PROTO
 extern Victory_Show: PROC
-extern Lose_create: PROTO, :HWND
 extern Lose_Show: PROC
 extern Life_Change: PROTO, :DWORD
 extern Score_Change: PROTO, :DWORD
 extern Life_Get: PROC
+extern Pause_Show: PROC
+
+extern normal_bgm_close: PROC
 DrawMob PROTO, :Mob
 Game_mousemove PROTO, :LPARAM
 
@@ -87,6 +88,7 @@ Game_create PROC USES edx, main_hwnd: HWND
 
     invoke  ShowWindow, game_hwnd, SW_HIDE
 	invoke  UpdateWindow, game_hwnd
+	invoke	SetFocus, game_hwnd
 
 	call Randomize
     
@@ -117,20 +119,24 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 	.ELSEIF uMsg == WM_PAINT
 		call	Game_draw
 		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
-	
+	.ELSEIF uMsg == WM_KEYDOWN
+		mShow wParam
+		.IF wParam == VK_ESCAPE
+			mWriteLn "ESC"
+			call Game_Hide
+			call Pause_Show
+		.ENDIF
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		invoke Game_mousemove, lParam
 		mov ebx, mobAmount
 		.IF levelKilled == ebx
 			invoke battle_bgm_close
-			invoke Victory_create, mainHwnd
 			call Victory_Show
 			invoke DestroyWindow, hwnd
 		.ENDIF
 		call Life_Get
 		.IF eax == 0
 			invoke battle_bgm_close
-			invoke Lose_create, mainHwnd
 			call Lose_Show
 			invoke DestroyWindow, hwnd
 		.ENDIF
@@ -146,19 +152,28 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		invoke	ReleaseDC, hwnd, hdc
 		call	Game_reset
 		mWriteLn "Destory"
+	
+	
     .ENDIF
 
 	invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
     ret
 Game_Process ENDP
 
+
 Game_Show PROC
-	invoke ShowWindow, game_hwnd, SW_SHOW
-	invoke UpdateWindow, game_hwnd
+	call normal_bgm_close
+	call	battle_bgm_play
+	invoke 	SetFocus, game_hwnd
+	invoke	SetTimer, game_hwnd, TimerID, 100, NULL
+	invoke	ShowWindow, game_hwnd, SW_SHOW
+	invoke	UpdateWindow, game_hwnd
 	ret
 Game_Show ENDP
 
 Game_Hide PROC
+	invoke battle_bgm_close
+	invoke KillTimer, game_hwnd, TimerID
 	invoke ShowWindow, game_hwnd, SW_HIDE
 	invoke UpdateWindow, game_hwnd
 	ret
@@ -257,5 +272,10 @@ Game_mousemove PROC USES eax ebx ecx edx esi edi, lParam: LPARAM
 	.ENDW
 	ret
 Game_mousemove ENDP
+
+game_destory PROC
+	invoke DestroyWindow, game_hwnd
+	ret
+game_destory ENDP
 
 END
