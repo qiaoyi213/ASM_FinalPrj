@@ -52,3 +52,4 @@ GdiplusStartupInput STRUCT
     SuppressBackgroundThread dword ?
     SuppressExternalCodecs dword ?
 GdiplusStartupInput ENDS
+

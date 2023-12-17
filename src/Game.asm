@@ -5,6 +5,7 @@ INCLUDE gdiplus.inc
 INCLUDE Reference.inc
 include       gdiplus.inc
 includelib    gdiplus.lib
+includelib WinMM.lib
 extern main_getHInstance: PROC
 
 extern Level_Load: PROTO, :DWORD, :PTR Mob
@@ -18,7 +19,9 @@ extern Slime_hert: PROTO, :PTR Mob, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
-extern DrawLife: PROTO, :DWORD
+extern DrawLife: PROTO, :HDC
+extern battle_bgm_play: PROC
+Game_draw PROTO, :HWND
 DrawMob PROTO, :Mob
 
 .data
@@ -83,8 +86,9 @@ Game_create PROC, main_hwnd: HWND
 Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
-	.IF uMsg == WM_CREATE
+    .IF uMsg == WM_CREATE
 		call	Resource_loadAll
+		call	battle_bgm_play
 		invoke	SetTimer, hwnd, TimerID, 100, NULL
 
 		invoke GetDC, hwnd
@@ -117,9 +121,10 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 				.ENDIF
 			.ENDIF
 
-			.IF eax == 1 && mobList[esi].isTouched == 0
+			.IF eax == 1 && mobList[esi].isTouched == 0 && mobList[esi].state != 4
 				mov mobList[esi].isTouched, 1
 				invoke Slime_hert, ADDR mobList[esi], 25
+				
 			.ENDIF
 
 			.IF eax == 0 && mobList[esi].isTouched == 1

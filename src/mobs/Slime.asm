@@ -4,10 +4,12 @@ INCLUDE Macros.inc
 INCLUDE ../Reference.inc
 
 extern Score_Add :PROTO, :DWORD
-
+extern slime_hit_play: PROC
+extern slime_dead_play: PROC
 .data
 	AttackEdge		DWORD	50
 	AnimationEdges	DWORD	10, 5, 10, 10
+	
 .code
 
 Slime_Build PROC USES eax esi, mptr: PTR Mob
@@ -111,12 +113,15 @@ Slime_hert PROC USES eax esi, mptr: PTR Mob, MATK: DWORD
 	sub eax, MATK
 
 	mov (Mob PTR [esi]).HP, eax
-
+	mShow (Mob PTR [esi]).HP
+	call slime_hit_play
 	.IF (Mob PTR [esi]).HP <= 0
 		mov (Mob PTR [esi]).state, _MOB_STATE_SIZE
 		invoke Score_Add, 100
+		call slime_dead_play
 		mWriteLn "DEAD"
 	.ENDIF
+
 	ret
 Slime_hert ENDP
 END

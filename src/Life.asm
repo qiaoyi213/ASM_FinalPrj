@@ -6,6 +6,7 @@ INCLUDE Reference.inc
 
 extern Resource_getHeartImg: PROTO, :DWORD
 
+extern player_hit_play: PROC
 .data
 Life    DWORD    5
 .code 
@@ -13,6 +14,7 @@ Life    DWORD    5
 Life_Sub PROC USES edx, num: DWORD
     mov edx, num
     sub Life, edx
+    call player_hit_play
     mShow Life
     ret
 Life_Sub ENDP

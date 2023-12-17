@@ -14,6 +14,7 @@ extern Game_init: PROC
 extern Resource_init: PROC
 extern Resource_cleanUp: PROC
 
+extern Read_all_sound: PROC
 .data
 	hInstance	HINSTANCE	?
 	
