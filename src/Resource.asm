@@ -1,87 +1,123 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
-INCLUDE WinUser.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 
 INCLUDE Reference.inc
 
-Resource_load PROTO, :HINSTANCE, :PTR DWORD, :PTR BYTE
+extern main_getHInstance: PROC
+
+Resource_load PROTO, :PTR BYTE, :PTR DWORD
 
 .data
+	GpInput			GdiplusStartupInput <1, 0, 0, 0>
+	hToken			DWORD				?
+	
+	WideNameBuf		WORD		64 DUP(0)
+	NameBuf			BYTE		64 DUP(0)
+	__resource		BYTE		"resources/", 0
+	__PNG			BYTE		".png", 0
 
-bitmapBuffer	BITMAP	<>
+	bgImg			DWORD		?
+	__bgName		BYTE		"bg", 0
 
-BGImgHandle		HBITMAP	?
-__BGImg			BYTE	"BGImg", 0
+	heartEmpty		DWORD		?
+	__heartEmpty	BYTE		"HeartEmpty", 0
+	heartFull		DWORD		?
+	__heartFull		BYTE		"HeartFull", 0
 
+	MobImg			DWORD		(_MOB_STATE_SIZE * _MOB_ID_SIZE) DUP (0)
+	__slime0		BYTE 		"slime0", 0
+	__slime1		BYTE		"slime1", 0
+	__slime2		BYTE		"slime2", 0
 
-__TrunkImg		BYTE 	"TrunkImg", 0
-__MushroomImg	BYTE 	"MushroomImg", 0
-
-HeartImgBrush	HBRUSH	2 DUP (?)
-__HeartFullImg	BYTE	"HeartFullImg", 0
-__HeartEmptyImg	BYTE	"HeartEmptyImg", 0
-
-MobImgHandle	HBITMAP	(_MOB_STATE_SIZE * _MOB_ID_SIZE) DUP (?)
-__Slime0		BYTE 	"Slime0", 0
-__Slime1		BYTE	"Slime1", 0
-__Slime2		BYTE	"Slime2", 0
-__Slime3		BYTE	"Slime3", 0
 
 .code
 
-Resource_load PROC USES esi eax, hInstance: HINSTANCE, hPtr: PTR DWORD, resName: PTR BYTE
-	mov 	esi, hPtr
-	; invoke  LoadBitmap, hInstance, resName
-	invoke	LoadImage, hInstance, resName, IMAGE_BITMAP,\
-			NULL, NULL, LR_CREATEDIBSECTION
-	; mShow eax
-	
-	mov		[esi], eax
-	invoke  GetObject, [esi], SIZEOF bitmapBuffer, OFFSET bitmapBuffer	
+Resource_init PROC
+	mWriteLn "Resource init"
+	invoke	GdiplusStartup, offset hToken, offset GpInput, NULL
+	ret
+Resource_init ENDP
+
+Resource_cleanUp PROC
+	mWriteLn "Resource clean up"
+	invoke	GdiplusShutdown, hToken
+	ret
+Resource_cleanUp ENDP
+
+Resource_load PROC USES eax ebx ecx edx esi edi, name: PTR BYTE, imgPtr: PTR DWORD
+format_directory:
+	mov esi, OFFSET __resource
+	mov edi, OFFSET NameBuf
+	mov ecx, LENGTHOF __resource
+	rep movsb
+
+	dec edi
+	mov esi, name
+	mov edx, name
+	call StrLength
+	mov ecx, eax
+	rep movsb
+
+	; dec edi				won't need since StrLength don't count NULL
+	mov esi, OFFSET __PNG
+	mov ecx, LENGTHOF __PNG
+	rep movsb
+move_into_WideBuffer:
+	mov esi, OFFSET NameBuf
+	mov edi, OFFSET WideNameBuf
+	.WHILE 1
+		mov al, BYTE PTR [esi]
+		mov BYTE PTR [edi], al	; tricky
+		add esi, TYPE BYTE
+		add edi, TYPE WORD
+		.BREAK .IF al == 0
+	.ENDW
+loader:
+	invoke GdipLoadImageFromFile, OFFSET WideNameBuf, imgPtr
 	ret
 Resource_load ENDP
 
-Resource_loadAll PROC, hInstance: HINSTANCE
-	; load background
-	invoke Resource_load, hInstance, OFFSET BGImgHandle, OFFSET __BGImg
-	
-	; load mobs
-	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 0], OFFSET __Slime0
-	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 1], OFFSET __Slime1
-	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 2], OFFSET __Slime2
-	invoke Resource_load, hInstance, OFFSET MobImgHandle[_MOB_SLIME_ID + _MOB_STATE_SIZE * 3], OFFSET __Slime3
-	
-	; load heart
-	invoke Resource_load, hInstance, OFFSET HeartImgBrush[0], OFFSET __HeartEmptyImg
-	invoke Resource_load, hInstance, OFFSET HeartImgBrush[1], OFFSET __HeartFullImg
-	
+Resource_loadAll PROC USES eax
+	invoke Resource_load, OFFSET __bgName, OFFSET bgImg
+
+	invoke Resource_load, OFFSET __heartEmpty, OFFSET heartEmpty
+	invoke Resource_load, OFFSET __heartFull, OFFSET heartFull
+
+	invoke Resource_load, OFFSET __slime0, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 0) * TYPE DWORD]
+	invoke Resource_load, OFFSET __slime1, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 1) * TYPE DWORD]
+	invoke Resource_load, OFFSET __slime2, OFFSET MobImg[(_MOB_SLIME_ID * _MOB_STATE_SIZE + 2) * TYPE DWORD]
 
 	ret
 Resource_loadAll ENDP
 
-Resource_getBGImgHandle PROC
-	mov eax, BGImgHandle
+Resource_getBGImg PROC
+	mov eax, bgImg
 	ret
-Resource_getBGImgHandle ENDP
+Resource_getBGImg ENDP
 
-Resource_getMobImgHandle PROC USES ebx, mob: Mob
-	mov eax, mob.state
+Resource_getMobImg PROC USES ebx, mob: Mob
+	mov eax, mob._type
 	mov ebx, _MOB_STATE_SIZE
 	mul ebx
-	add eax, mob._type
+	add eax, mob.state
+	mov ebx, (TYPE DWORD)
+	mul ebx
 
 	mov ebx, eax
-	mov eax, MobImgHandle[ebx]
-	; mShow eax
+	mov eax, MobImg[ebx]
 	ret
-Resource_getMobImgHandle ENDP
+Resource_getMobImg ENDP
 
-Resource_getHeartImgHandle PROC USES edx, id: DWORD
-	mov edx, id
-	mov eax, HeartImgBrush[edx]
+Resource_getHeartImg PROC, isFull: DWORD
+	.IF isFull == 1
+		mov eax, heartFull
+	.ELSE
+		mov eax, heartEmpty
+	.ENDIF
 	ret
-Resource_getHeartImgHandle ENDP
+Resource_getHeartImg ENDP
 
 
 

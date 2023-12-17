@@ -1,24 +1,24 @@
 INCLUDE Ervine32.inc
 INCLUDE WINDOWS.inc
 INCLUDE Macros.inc
+INCLUDE gdiplus.inc
 INCLUDE Reference.inc
 include       gdiplus.inc
 includelib    gdiplus.lib
 extern main_getHInstance: PROC
 
-extern Resource_getMobImgHandle: PROTO, :Mob
-extern Resource_getBGImgHandle: PROTO
-
 extern Level_Load: PROTO, :DWORD, :PTR Mob
+
+extern Resource_loadAll: PROC
+extern Resource_getBGImg: PROC
+extern Resource_getMobImg: PROTO, :Mob
 
 extern Slime_update: PROTO, :PTR Mob
 extern Slime_hert: PROTO, :PTR Mob, :DWORD
 extern Collision_Check: PROTO, :LPARAM, :Mob
 extern Life_Sub: PROTO, :DWORD
 extern DrawScore: PROTO, :HDC
-extern DrawLife: PROTO, :HDC
-extern PlotIMG: PROTO, :HDC
-Game_draw PROTO, :HWND
+extern DrawLife: PROTO, :DWORD
 DrawMob PROTO, :Mob
 
 .data
@@ -38,13 +38,13 @@ game_hwnd			HWND		?
 
 hdc					HDC			?
 hdcBuffer			HDC			?
-
+hbitmap				HBITMAP		?
+mainGraphic			DWORD		?	; PTR GpGraphics
+bufferGraphic		DWORD		?
 
 isInvincible		DWORD		0
 invincibleTick		DWORD		0
 
-GpInput     		GdiplusStartupInput <1,0,0,0>
-hToken        		dd      	?
 .code
 
 Game_init PROC
@@ -83,27 +83,34 @@ Game_create PROC, main_hwnd: HWND
 Game_create ENDP
 
 Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPARAM
-    .IF uMsg == WM_CREATE
+	.IF uMsg == WM_CREATE
+		call	Resource_loadAll
 		invoke	SetTimer, hwnd, TimerID, 100, NULL
 
-		invoke	GetDC, hwnd
-		mov		hdc, eax
-		invoke	CreateCompatibleDC, eax
+		invoke GetDC, hwnd
+		mov hdc, eax
+		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+
+		invoke	CreateCompatibleDC, hdc
 		mov		hdcBuffer, eax
+		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
+		mov		hbitmap, eax
+		invoke	SelectObject, hdcBuffer, hbitmap
+		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
 
 		invoke	Level_Load, 1, ADDR mobList
 		mov 	mobAmount, ecx
 
 	.ELSEIF uMsg == WM_PAINT
-		invoke  BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer,\
-				0, 0, SRCCOPY
+		call	Game_draw
+		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	
 	.ELSEIF uMsg == WM_MOUSEMOVE
 		mov ecx, 0
 		mov esi, 0
 		.WHILE ecx < mobAmount
 			invoke Collision_Check, lParam, mobList[esi]
-			.IF eax == 1 && mobList[esi].state == 3
+			.IF eax == 1 && mobList[esi].state == 2
 				.IF isInvincible == 0
 					invoke Life_Sub, 1
 					mov isInvincible, 1
@@ -124,15 +131,15 @@ Game_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 		
 	.ELSEIF uMsg == WM_TIMER
 		call Game_update
-		invoke Game_draw, hwnd
-		
 		invoke InvalidateRect, hwnd, NULL, TRUE
 
 	.ELSEIF uMsg == WM_DESTROY
-		invoke  DeleteDC, hdcBuffer
+		invoke	GdipDeleteGraphics, bufferGraphic
+		invoke	DeleteObject, hbitmap
+		invoke	DeleteDC, hdcBuffer
+		invoke	GdipDeleteGraphics, mainGraphic
 		invoke	ReleaseDC, hwnd, hdc
 		mWriteLn "Destory"
-
     .ENDIF
 
 	invoke  DefWindowProc, hwnd, uMsg, wParam, lParam
@@ -155,24 +162,17 @@ Game_Hide PROC
 	ret
 Game_Hide ENDP
 
-Game_draw PROC USES eax, hwnd :HWND
-	INVOKE  CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT		;以 hdc 為本，建立未初始化的位元圖
-	INVOKE  SelectObject, hdcBuffer, eax									;把位元圖選入緩衝區的記憶體設備內容
-	
-
+Game_draw PROC USES eax
 	call DrawBG
 	call DrawMobs
-
-	INVOKE	DrawLife, hdcBuffer
+	INVOKE	DrawLife, bufferGraphic
 	INVOKE 	DrawScore, hdcBuffer
 	ret
 Game_draw ENDP
 
 DrawBG PROC USES eax
-	call	Resource_getBGImgHandle
-	invoke  CreatePatternBrush, eax
-	INVOKE  SelectObject, hdcBuffer, eax
-	INVOKE  PatBlt, hdcBuffer, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, PATCOPY
+	call 	Resource_getBGImg
+	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT
 	ret
 DrawBG ENDP
 
@@ -190,22 +190,11 @@ DrawMobs PROC USES ecx esi
 DrawMobs ENDP
 
 DrawMob PROC USES eax ebx ecx edx esi edi, mob: Mob
-	LOCAL tmpHdc: HDC
-
-	invoke 	CreateCompatibleDC, hdcBuffer
-	mov		tmpHdc, eax
-	invoke  Resource_getMobImgHandle, mob
-	invoke  SelectObject, tmpHdc, eax
-
-
-
-	mov		eax, 44
+	invoke	Resource_getMobImg, mob
+	mov		ebx, eax
+	mov		eax, mob._width
 	mul		mob.AnimationTick
-
-	invoke  BitBlt, hdcBuffer, mob.X, mob.Y, 44, 30, tmpHdc,\
-			eax, 0, SRCCOPY
-	
-	invoke  DeleteDC, tmpHdc
+	invoke	GdipDrawImagePointRectI, bufferGraphic, ebx, mob.X, mob.Y, eax, 0, mob._width, mob._height, UnitPixel
 	ret
 DrawMob ENDP
 
