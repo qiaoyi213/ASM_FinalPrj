@@ -9,6 +9,7 @@ extern StartMenu_create: PROTO, :HWND
 extern GetIndexedStr: PROTO, :DWORD
 extern victory_bgm_play: PROC
 extern victory_bgm_stop: PROC
+extern Resource_getVictory: PROC
 DrawMob PROTO, :Mob
 
 
@@ -82,6 +83,20 @@ Victory_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: L
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
 
+		invoke GetDC, hwnd
+		mov hdc, eax
+		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+
+		invoke	CreateCompatibleDC, hdc
+		mov		hdcBuffer, eax
+		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
+		mov		hbitmap, eax
+		invoke	SelectObject, hdcBuffer, hbitmap
+		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
+
+	.ELSEIF uMsg == WM_PAINT
+		call	Victory_draw
+		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_BACK_EXECCODE
@@ -122,4 +137,9 @@ Victory_Hide PROC
     ret
 Victory_Hide ENDP
 
+Victory_draw PROC
+	call Resource_getVictory
+	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, 640, 400
+	ret
+Victory_draw ENDP
 END

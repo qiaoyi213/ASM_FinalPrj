@@ -9,16 +9,17 @@ extern StartMenu_create: PROTO, :HWND
 extern GetIndexedStr: PROTO, :DWORD
 extern lose_bgm_play: PROC
 extern lose_bgm_stop: PROC
+extern Resource_getLose: PROC
 DrawMob PROTO, :Mob
 
 
 .data
 
 hInstance			HINSTANCE	?
-LoseClassName	BYTE		"PaneLose", 0
-LoseClass		WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET LoseClassName,?>
-LoseTitle		BYTE		"Lose Title", 0
-Lose_hwnd		HWND		?
+LoseClassName		BYTE		"PaneLose", 0
+LoseClass			WNDCLASSEX	<30h,?,?,0,0,?,?,?,?,0,OFFSET LoseClassName,?>
+LoseTitle			BYTE		"Lose Title", 0
+Lose_hwnd			HWND		?
 BTN_WIDTH			DWORD		400
 BTN_HEIGHT			DWORD		60
 hdc					HDC			?
@@ -29,6 +30,8 @@ bufferGraphic		DWORD		?
 
 BTN_BACK_EXECCODE   HMENU       103
 BTN_BACK_TEXT       BYTE        "Back to Menu", 0
+
+LOSE_TEXT			BYTE		"You LOSE"
 mainHwnd            HWND        ?
 
 .code
@@ -56,13 +59,14 @@ Lose_create PROC USES eax edx, main_hwnd: HWND
 			WS_CHILD or WS_VISIBLE,\
 			0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT,\
 			main_hwnd, NULL, hInstance, NULL
+	
+	
 
     mov Lose_hwnd, eax
     mShow Lose_hwnd
 
     invoke  ShowWindow, Lose_hwnd, SW_HIDE
 	invoke  UpdateWindow, Lose_hwnd
-
 	mov eax, Lose_hwnd
     ret
 Lose_create ENDP
@@ -82,6 +86,20 @@ Lose_Process PROC USES ecx, hwnd: HWND, uMsg: UINT, wParam: WPARAM, lParam: LPAR
 			ebx, 400, BTN_WIDTH, BTN_HEIGHT,\
 			hwnd, BTN_BACK_EXECCODE, hInstance, NULL
 
+		invoke GetDC, hwnd
+		mov hdc, eax
+		invoke	GdipCreateFromHDC, hdc, ADDR mainGraphic
+
+		invoke	CreateCompatibleDC, hdc
+		mov		hdcBuffer, eax
+		invoke	CreateCompatibleBitmap, hdc, _WINDOW_WIDTH, _WINDOW_HEIGHT
+		mov		hbitmap, eax
+		invoke	SelectObject, hdcBuffer, hbitmap
+		invoke	GdipCreateFromHDC, hdcBuffer, ADDR bufferGraphic
+
+	.ELSEIF uMsg == WM_PAINT
+		call	Lose_draw
+		invoke	BitBlt, hdc, 0, 0, _WINDOW_WIDTH, _WINDOW_HEIGHT, hdcBuffer, 0, 0, SRCCOPY
 	.ELSEIF uMsg == WM_COMMAND
 		mov eax, wParam
 		.IF eax == BTN_BACK_EXECCODE
@@ -123,4 +141,10 @@ Lose_Hide PROC
     ret
 Lose_Hide ENDP
 
+Lose_draw PROC USES eax
+	call Resource_getLose
+	mShow eax
+	invoke	GdipDrawImageRectI, bufferGraphic, eax, 0, 0, 640, 400
+	ret
+Lose_draw ENDP
 END
